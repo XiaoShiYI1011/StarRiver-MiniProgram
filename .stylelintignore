@@ -1,0 +1,11 @@
+dist
+node_modules
+unpackage
+uni_modules
+.husky
+.vscode
+.idea
+*.sh
+*.md
+
+static

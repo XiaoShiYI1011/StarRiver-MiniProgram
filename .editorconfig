@@ -1,0 +1,16 @@
+# http://editorconfig.org
+root = true
+
+# 所有源码文件统一使用两空格缩进和换行结尾
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# 文档保留行尾空格，避免破坏手写换行
+[*.md]
+max_line_length = off
+trim_trailing_whitespace = false

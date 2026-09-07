@@ -1,0 +1,16 @@
+dist
+node_modules
+unpackage
+uni_modules
+.husky
+.vite
+.vscode
+.idea
+*.sh
+*.md
+
+static
+
+# uni-app 配置文件包含条件编译注释，交由 HBuilderX 维护，不参与格式化
+manifest.json
+pages.json
