@@ -3,3 +3,7 @@ node_modules/
 .DS_Store
 .hbuilderx/
 project.private.config.json
+
+# 仓库的 .NET NuGet 规则会忽略 Packages，此处保留 UniApp 业务分包源码。
+!packages/
+!packages/**

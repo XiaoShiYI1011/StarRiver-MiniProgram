@@ -42,6 +42,11 @@
   },
   "quickapp": {},
   "mp-weixin": {
+    "lazyCodeLoading": "requiredComponents",
+    "optimization": {
+      "subPackages": true
+    },
+    "darkmode": true,
     "appid": "",
     "setting": {
       "urlCheck": true

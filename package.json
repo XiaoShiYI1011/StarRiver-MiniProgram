@@ -3,10 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "lint": "npm run lint:eslint && npm run lint:stylelint && npm run lint:prettier",
+    "build:mp-weixin": "node scripts/build-local.cjs mp-weixin",
+    "build:h5": "node scripts/build-local.cjs h5",
+    "test:mock": "node --test tests/mockStudioService.test.cjs",
+    "lint": "npm run lint:eslint && npm run lint:stylelint && npm run lint:prettier && npm run lint:scss-structure",
     "lint:eslint": "eslint .",
     "lint:prettier": "prettier --check \"**/*.{js,cjs,mjs,vue,css,scss}\" \"*.html\"",
     "lint:stylelint": "stylelint \"**/*.{css,scss,vue}\"",
+    "lint:scss-structure": "node scripts/check-scss-structure.cjs",
     "lint:lint-staged": "lint-staged",
     "type-check": "vue-tsc --noEmit"
   },
@@ -37,6 +41,7 @@
     "@eslint/js": "^9.12.0",
     "@typescript-eslint/eslint-plugin": "^8.8.1",
     "@typescript-eslint/parser": "^8.8.1",
+    "@vue/shared": "3.4.21",
     "eslint": "^9.12.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
@@ -53,7 +58,7 @@
     "stylelint-config-recommended-vue": "^1.5.0",
     "stylelint-config-standard": "^36.0.1",
     "typescript": "~5.7.3",
-    "vue": "^3.5.42",
+    "vue": "3.4.21",
     "vue-tsc": "^2.2.0"
   }
 }
