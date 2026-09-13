@@ -112,7 +112,7 @@ setPageTheme("auto"); // 恢复跟随系统，也可传 light / dark
 
 插槽内容可使用容器继承的 CSS 变量：`--page`、`--paper-raised`、`--paper-inset`、`--surface-strong`、`--ink`、`--ink-soft`、`--ink-faint`、`--line`、`--accent`、`--accent-wash`、`--shadow-float`。内容组件应使用这些变量，避免硬编码白底黑字。主题变量只作用于容器后代，不会给挂在页面外的原生弹窗自动换肤。
 
-导航根据 `uni.getWindowInfo()` 和微信 `uni.getMenuButtonBoundingClientRect()` 计算状态栏高度及右侧避让；窗口尺寸变化时重新测量，无效胶囊数据有保守回退。原生胶囊无需再绘制。底部安全区通过 `env(safe-area-inset-bottom)` 统一占位。小程序软键盘、原生 tabBar 和 iOS 安全区仍建议在目标真机验收。
+导航根据 微信原生同步 `wx.getWindowInfo()` 和 `wx.getMenuButtonBoundingClientRect()` 计算状态栏高度及右侧避让；窗口尺寸变化时重新测量，无效胶囊数据有保守回退。原生胶囊无需再绘制。底部安全区通过 `env(safe-area-inset-bottom)` 统一占位。小程序软键盘、原生 tabBar 和 iOS 安全区仍建议在目标真机验收。
 
 平台依据：[scroll-view](https://uniapp.dcloud.net.cn/component/scroll-view.html)、[DarkMode](https://uniapp.dcloud.net.cn/tutorial/darkmode)、[页面配置](https://uniapp.dcloud.net.cn/collocation/pages)。
 

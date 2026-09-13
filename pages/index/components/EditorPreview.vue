@@ -7,16 +7,16 @@
     <view class="editor-preview">
       <view class="editor-header">
         <view class="editor-dots">
-          <view />
-          <view />
-          <view />
+          <view class="editor-dot" />
+          <view class="editor-dot" />
+          <view class="editor-dot" />
         </view>
         <text>第七章 · 她从雾里来</text>
       </view>
       <view class="manuscript">
-        <text>雨是在傍晚六点停的。</text>
-        <text>沈砚推开旧钟表店的门，檐角最后一滴水恰好落在他肩上。</text>
-        <text>“你还记得我吗？”她问。</text>
+        <text class="manuscript-line">雨是在傍晚六点停的。</text>
+        <text class="manuscript-line">沈砚推开旧钟表店的门，檐角最后一滴水恰好落在他肩上。</text>
+        <text class="manuscript-line">“你还记得我吗？”她问。</text>
       </view>
       <view class="editor-hint">
         <text class="editor-hint__label">创作建议</text>
@@ -82,14 +82,14 @@
     gap: 8rpx;
   }
 
-  .editor-dots view {
+  .editor-dot {
     width: 14rpx;
     height: 14rpx;
     background: var(--line-strong);
     border-radius: 50%;
   }
 
-  .manuscript text {
+  .manuscript-line {
     display: block;
     margin-top: 18rpx;
     font-family: "Songti SC", STSong, serif;

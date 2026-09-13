@@ -60,7 +60,7 @@ const emit = defineEmits<{ tap: [] }>();
   &__description {
     display: block;
     margin-top: 4rpx;
-    font-size: 22rpx;
+    font-size: 24rpx;
     line-height: 1.5;
     color: var(--ink-soft);
   }

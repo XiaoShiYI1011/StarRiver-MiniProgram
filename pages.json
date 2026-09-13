@@ -1,28 +1,71 @@
 {
   "pages": [
-    { "path": "pages/index/index", "style": { "navigationBarTitleText": "星河创作" } }
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "星河创作",
+        "disableScroll": true
+      }
+    }
   ],
   "subPackages": [
     {
       "root": "packages/shop",
       "name": "shop",
-      "pages": [ { "path": "pages/plans/index", "style": { "navigationBarTitleText": "套餐" } } ]
+      "pages": [
+        {
+          "path": "pages/plans/index",
+          "style": {
+            "navigationBarTitleText": "套餐",
+            "disableScroll": true
+          }
+        }
+      ]
     },
     {
       "root": "packages/account",
       "name": "account",
       "pages": [
-        { "path": "pages/mine/index", "style": { "navigationBarTitleText": "我的" } },
-        { "path": "pages/bind/index", "style": { "navigationBarTitleText": "绑定账号" } },
-        { "path": "pages/orders/index", "style": { "navigationBarTitleText": "订单记录" } },
-        { "path": "pages/novels/index", "style": { "navigationBarTitleText": "我的作品" } },
-        { "path": "pages/document/index", "style": { "navigationBarTitleText": "协议与说明" } }
+        {
+          "path": "pages/mine/index",
+          "style": {
+            "navigationBarTitleText": "我的",
+            "disableScroll": true
+          }
+        },
+        {
+          "path": "pages/bind/index",
+          "style": {
+            "navigationBarTitleText": "绑定账号",
+            "disableScroll": true
+          }
+        },
+        {
+          "path": "pages/orders/index",
+          "style": {
+            "navigationBarTitleText": "订单记录",
+            "disableScroll": true
+          }
+        },
+        {
+          "path": "pages/novels/index",
+          "style": {
+            "navigationBarTitleText": "我的作品",
+            "disableScroll": true
+          }
+        },
+        {
+          "path": "pages/document/index",
+          "style": {
+            "navigationBarTitleText": "协议与说明",
+            "disableScroll": true
+          }
+        }
       ]
     }
   ],
   "globalStyle": {
     "navigationStyle": "custom",
-    "disableScroll": true,
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "星河创作",
     "navigationBarBackgroundColor": "#F5F7FB",

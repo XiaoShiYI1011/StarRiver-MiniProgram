@@ -10,11 +10,13 @@
       <text v-if="error" class="error-text">{{ error }}</text>
     </view>
     <template #actions>
-      <template v-if="order?.status === 'pending'">
-        <button class="primary-button" :disabled="busy" :loading="busy" @tap="updateOrder('pay')">模拟支付</button>
-        <button class="secondary-button" :disabled="busy" @tap="updateOrder('cancel')">取消订单</button>
-      </template>
-      <button v-else class="secondary-button" @tap="close">知道了</button>
+      <view class="dialog-button-stack">
+        <template v-if="order?.status === 'pending'">
+          <button class="primary-button" :disabled="busy" :loading="busy" @tap="updateOrder('pay')">模拟支付</button>
+          <button class="secondary-button" :disabled="busy" @tap="updateOrder('cancel')">取消订单</button>
+        </template>
+        <button v-else class="secondary-button" @tap="close">知道了</button>
+      </view>
     </template>
   </AppDialog>
 </template>

@@ -64,6 +64,7 @@ const filteredOrders = computed(() =>
 
   .order-tab {
     flex: 1;
+    min-height: 88rpx;
     padding: 16rpx 4rpx;
     margin: 0;
     font-size: 24rpx;

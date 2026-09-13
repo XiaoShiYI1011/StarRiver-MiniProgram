@@ -69,7 +69,7 @@ defineProps<{ novel: Novel }>();
 
   .novel-date {
     margin-top: auto;
-    font-size: 21rpx;
+    font-size: 24rpx;
     color: var(--ink-faint);
   }
 }

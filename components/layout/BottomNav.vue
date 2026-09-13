@@ -43,7 +43,7 @@ const tabs: { id: MainTab; icon: string; label: string }[] = [
     min-height: 108rpx;
     padding: 12rpx 8rpx;
     margin: 0;
-    font-size: 22rpx;
+    font-size: 24rpx;
     font-weight: 650;
     line-height: 1.4;
     color: var(--ink-faint);

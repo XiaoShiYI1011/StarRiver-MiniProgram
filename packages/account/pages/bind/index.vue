@@ -2,18 +2,20 @@
   <AppPage title="绑定账号" subtitle="让创作在不同设备间延续" show-back @back-fallback="goHome">
     <template #mainContent>
       <view class="page-stack bind-page">
-        <PageHeading title="绑定账号" description="绑定后，即可在小程序中查看账号的作品、章节与创作权益。" />
+        <PageHeading title="绑定账号" description="验证微信身份，连接你的星河创作账号。" />
         <view class="surface-card">
           <view class="bind-identity">
             <text class="identity-avatar">微</text>
             <view>
               <text class="identity-title">微信用户</text>
-              <text class="identity-note">演示登录态 · 无需真实微信授权</text>
+              <text class="identity-note">
+                {{ isWeChatAuth ? "绑定后可在本机快捷登录" : "H5 原型预览 · 无需真实微信授权" }}
+              </text>
             </view>
           </view>
         </view>
         <BindingForm @success="finish" />
-        <text class="binding-footer">仅演示账号绑定流程，不会获取你的微信好友与朋友圈信息</text>
+        <text class="binding-footer">不会获取你的微信好友与朋友圈信息</text>
       </view>
     </template>
   </AppPage>
@@ -25,6 +27,7 @@ import AppPage from "@/layout/components/pageContainer.vue";
 import PageHeading from "@/components/ui/PageHeading.vue";
 import BindingForm from "../../components/BindingForm.vue";
 import { goHome, mainRoutes } from "@/utils/navigation";
+import { isWeChatAuth } from "@/config/api";
 
 const productId = ref("");
 
@@ -72,13 +75,13 @@ const finish = () => {
   .identity-note {
     display: block;
     margin-top: 4rpx;
-    font-size: 22rpx;
+    font-size: 24rpx;
     color: var(--ink-soft);
   }
 
   .binding-footer {
     padding: 12rpx;
-    font-size: 22rpx;
+    font-size: 24rpx;
     color: var(--ink-faint);
     text-align: center;
   }

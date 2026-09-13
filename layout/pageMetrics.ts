@@ -1,3 +1,6 @@
+// 微信原生同步 API，避免旧版 uni 适配层返回不完整的窗口尺寸。
+declare const wx: Pick<typeof uni, "getWindowInfo" | "getSystemInfoSync" | "getMenuButtonBoundingClientRect">;
+
 export interface PageMetrics {
   statusBarHeight: number;
   navigationHeight: number;
@@ -14,14 +17,40 @@ export const getPageMetrics = (): PageMetrics => {
   // #endif
 
   try {
-    const info = uni.getWindowInfo();
-    metrics.statusBarHeight = info.statusBarHeight || 0;
+    let info: { statusBarHeight?: number; windowWidth: number };
+    // #ifdef MP-WEIXIN
+    try {
+      info = wx.getWindowInfo();
+    } catch {
+      info = wx.getSystemInfoSync();
+    }
+    if (!Number.isFinite(info?.windowWidth) || !Number.isFinite(info?.statusBarHeight)) {
+      info = wx.getSystemInfoSync();
+    }
+    // #endif
+    // #ifndef MP-WEIXIN
+    info = uni.getWindowInfo();
+    // #endif
+    if (
+      typeof info.statusBarHeight === "number" &&
+      Number.isFinite(info.statusBarHeight) &&
+      info.statusBarHeight >= 0
+    ) {
+      metrics.statusBarHeight = info.statusBarHeight;
+    }
 
     // #ifdef MP-WEIXIN
-    const capsule = uni.getMenuButtonBoundingClientRect();
-    if (capsule.width > 0 && capsule.height > 0 && capsule.top >= metrics.statusBarHeight && capsule.left > 0) {
+    const capsule = wx.getMenuButtonBoundingClientRect();
+    if (capsule.width > 0 && capsule.height > 0 && capsule.left > 0 && capsule.top >= metrics.statusBarHeight) {
+      // 某些开发工具机型返回 20px 状态栏，但胶囊仍位于刘海屏位置。
+      // 以实际胶囊为准，避免导航按钮进入刘海区域。
+      if (capsule.top - metrics.statusBarHeight > 20) {
+        metrics.statusBarHeight = capsule.top - 6;
+      }
       metrics.navigationHeight = Math.max(44, capsule.height + (capsule.top - metrics.statusBarHeight) * 2);
-      metrics.navigationRight = Math.max(16, info.windowWidth - capsule.left + 8);
+      if (Number.isFinite(info.windowWidth)) {
+        metrics.navigationRight = Math.max(16, info.windowWidth - capsule.left + 8);
+      }
     }
     // #endif
   } catch {

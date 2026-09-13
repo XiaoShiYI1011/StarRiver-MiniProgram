@@ -2,7 +2,15 @@
   <AppPage refresher-enabled :refresher-triggered="refreshing" @refresh="reload">
     <template #mainContent>
       <view class="page-stack">
-        <PageHeading title="我的" description="账号、权益与订单。当前展示本地演示数据。" />
+        <PageHeading
+          title="我的"
+          :description="
+            isWeChatAuth
+              ? '管理账号与创作权益。套餐、作品和订单为演示内容。'
+              : 'H5 原型预览：账号、权益与订单均为本地演示数据。'
+          "
+        />
+        <AuthStatusNotice />
         <AccountCard :account="account" @bind="openBind()" />
         <EntitlementCard v-if="account" :account="account" />
         <SectionHeading eyebrow="创作" title="我的作品" />
@@ -14,12 +22,7 @@
             @tap="openNovels"
           />
           <view class="cell-group__divider" />
-          <InfoCell
-            icon="clipboard"
-            title="复制网址到电脑"
-            description="www.example.com（正式域名以发布为准）"
-            @tap="copyWebsite"
-          />
+          <InfoCell icon="clipboard" title="电脑端创作" description="正式网址待上线后提供" @tap="copyWebsite" />
         </view>
         <SectionHeading eyebrow="交易" title="订单记录" action="全部" @action="openOrders" />
         <OrderList :orders="dashboard.orders.slice(0, 3)" @select="selectedOrder = $event" />
@@ -39,10 +42,18 @@
     <template #dialogContainer>
       <OrderDetailDialog :order="selectedOrder" @close="selectedOrder = null" />
       <AppDialog :open="logoutOpen" title="退出登录" :busy="loggingOut" @close="logoutOpen = false">
-        <text class="muted-text">退出后可重新绑定账号，本地演示的权益和订单将保留。</text>
+        <text class="muted-text">
+          {{
+            isWeChatAuth
+              ? "退出将撤销当前登录会话，微信绑定关系仍保留；再次绑定原账号即可登录。"
+              : "退出后可重新绑定账号，本地演示的权益和订单将保留。"
+          }}
+        </text>
         <template #actions>
-          <button class="danger-button" :disabled="loggingOut" @tap="logout">确认退出</button>
-          <button class="secondary-button" @tap="logoutOpen = false">继续使用</button>
+          <view class="dialog-button-stack">
+            <button class="danger-button" :disabled="loggingOut" @tap="logout">确认退出</button>
+            <button class="secondary-button" @tap="logoutOpen = false">继续使用</button>
+          </view>
         </template>
       </AppDialog>
     </template>
@@ -67,6 +78,8 @@ import { useStudio } from "@/composables/useStudio";
 import { openBind, openDocument } from "@/utils/navigation";
 import { studioService } from "@/services/studioService";
 import { errorMessage } from "@/utils/format";
+import AuthStatusNotice from "@/components/layout/AuthStatusNotice.vue";
+import { isWeChatAuth } from "@/config/api";
 import type { Order } from "@/types/studio";
 
 const { dashboard, account, refresh } = useStudio();
@@ -90,11 +103,7 @@ onShow(() => {
 
 const openNovels = () => (account.value ? uni.navigateTo({ url: "/packages/account/pages/novels/index" }) : openBind());
 const openOrders = () => (account.value ? uni.navigateTo({ url: "/packages/account/pages/orders/index" }) : openBind());
-const copyWebsite = () =>
-  uni.setClipboardData({
-    data: "https://www.example.com",
-    success: () => uni.showToast({ title: "已复制演示网址", icon: "none" }),
-  });
+const copyWebsite = () => uni.showToast({ title: "电脑端网址将在正式上线后提供", icon: "none" });
 const showVersion = () => uni.showToast({ title: "星河创作 v0.1.0 · 本地演示版", icon: "none" });
 const logout = async () => {
   if (loggingOut.value) return;

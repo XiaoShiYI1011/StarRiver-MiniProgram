@@ -1,9 +1,9 @@
 <template>
-  <view v-if="open" class="dialog-mask" @tap="emit('close')" @touchmove.stop.prevent>
+  <view v-if="open" class="dialog-mask" @tap="!busy && emit('close')" @touchmove.stop.prevent>
     <view class="dialog-panel" role="dialog" :aria-label="title" @tap.stop>
       <view class="dialog-heading">
         <text class="dialog-title">{{ title }}</text>
-        <button class="dialog-close" aria-label="关闭弹窗" :disabled="busy" @tap="emit('close')">
+        <button class="dialog-close" aria-label="关闭弹窗" :disabled="busy" @tap="!busy && emit('close')">
           <AppIcon name="close" tone="muted" />
         </button>
       </view>
@@ -40,6 +40,7 @@ const emit = defineEmits<{ close: [] }>();
     border: 1px solid var(--line);
     border-radius: 40rpx;
     box-shadow: var(--shadow-float);
+    animation: dialog-enter 160ms ease-out;
   }
 
   .dialog-heading {
@@ -73,6 +74,24 @@ const emit = defineEmits<{ close: [] }>();
 
   .dialog-body {
     max-height: 50vh;
+  }
+
+  @keyframes dialog-enter {
+    from {
+      opacity: 0;
+      transform: translateY(12rpx);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dialog-panel {
+      animation: none;
+    }
   }
 
   .dialog-actions {

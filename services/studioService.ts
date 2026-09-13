@@ -1,5 +1,7 @@
 import { mockStudioService } from "./mockStudioService";
+import { miniStudioService } from "./miniStudioService";
+import { isWeChatAuth } from "@/config/api";
 import type { StudioService } from "@/types/studio";
 
-// 确认原型效果后，在此处替换为 HTTP 适配器，页面无需读取 mocks。
-export const studioService: StudioService = mockStudioService;
+// 微信使用真实身份；H5 保持明确标注的原型预览。业务权益仍是本地演示。
+export const studioService: StudioService = isWeChatAuth ? miniStudioService : mockStudioService;

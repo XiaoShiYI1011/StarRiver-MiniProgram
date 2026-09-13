@@ -4,6 +4,7 @@
       <text class="pack-name">加油包 · {{ pack.words / 10000 }} 万字</text>
       <text class="pack-description">一次性额度 · {{ pack.days }} 天有效</text>
       <text class="pack-price">¥{{ pack.price }}</text>
+      <text class="pack-action">选择加油包 →</text>
     </button>
   </view>
 </template>
@@ -46,8 +47,15 @@ const emit = defineEmits<{ select: [pack: Pack] }>();
   }
 
   .pack-description {
-    font-size: 22rpx;
+    font-size: 24rpx;
     color: var(--ink-soft);
+  }
+
+  .pack-action {
+    margin-top: 12rpx;
+    font-size: 24rpx;
+    font-weight: 600;
+    color: var(--accent);
   }
 
   .pack-price {

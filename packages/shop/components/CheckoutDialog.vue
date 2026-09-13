@@ -1,5 +1,5 @@
 <template>
-  <AppDialog :open="!!product" title="确认开通" :busy="busy" @close="emit('close')">
+  <AppDialog :open="!!product" title="确认模拟开通" :busy="busy" @close="emit('close')">
     <view v-if="product" class="checkout-summary">
       <text class="checkout-name">{{ product.name }}</text>
       <text class="checkout-price">¥{{ product.price }}</text>
@@ -10,8 +10,10 @@
       <text v-if="error" class="error-text">{{ error }}</text>
     </view>
     <template #actions>
-      <button class="primary-button" :loading="busy" :disabled="busy" @tap="emit('confirm')">模拟开通</button>
-      <button class="secondary-button" :disabled="busy" @tap="emit('later')">生成订单，稍后支付</button>
+      <view class="dialog-button-stack">
+        <button class="primary-button" :loading="busy" :disabled="busy" @tap="emit('confirm')">模拟开通</button>
+        <button class="secondary-button" :disabled="busy" @tap="emit('later')">仅生成演示订单</button>
+      </view>
     </template>
   </AppDialog>
 </template>

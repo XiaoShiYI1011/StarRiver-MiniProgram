@@ -2,10 +2,7 @@
   <AppPage>
     <template #mainContent>
       <view class="page-stack">
-        <PageHeading
-          title="套餐"
-          description="订阅按周期提供创作额度。以下为示例价格与额度，正式以套餐上线配置为准。"
-        />
+        <PageHeading title="套餐" description="选择适合你的创作额度。当前为演示套餐，模拟开通不扣款。" />
         <view v-if="loadError" class="empty-state">
           <text>{{ loadError }}</text>
           <button class="text-button" @tap="loadProducts">重新加载</button>

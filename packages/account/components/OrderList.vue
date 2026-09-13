@@ -80,7 +80,7 @@ const statusLabels: Record<OrderStatus, string> = { completed: "已完成", pend
   .order-date {
     display: block;
     margin-top: 4rpx;
-    font-size: 21rpx;
+    font-size: 24rpx;
     color: var(--ink-faint);
   }
 

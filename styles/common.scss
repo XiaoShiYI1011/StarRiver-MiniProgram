@@ -95,7 +95,7 @@
 }
 
 .subtle-text {
-  font-size: 22rpx;
+  font-size: 24rpx;
   color: var(--ink-faint);
 }
 
@@ -145,4 +145,14 @@
     color: var(--ink-faint);
     background: var(--paper-inset);
   }
+}
+
+.dialog-button-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.button-hover {
+  opacity: 0.78;
 }

@@ -4,7 +4,7 @@
       <view class="stat">
         <text class="stat-label">当前套餐</text>
         <text class="stat-value">{{ account.planName }}</text>
-        <text class="stat-note">剩余 {{ account.remainingDays }} 天 · 自动续费已关</text>
+        <text class="stat-note">剩余 {{ account.remainingDays }} 天</text>
       </view>
       <view class="stat">
         <text class="stat-label">剩余积分</text>
@@ -43,7 +43,7 @@ defineProps<{ account: Account }>();
 
   .stat-label {
     display: block;
-    font-size: 21rpx;
+    font-size: 24rpx;
     color: var(--ink-soft);
   }
 
@@ -58,7 +58,7 @@ defineProps<{ account: Account }>();
   .stat-note {
     display: block;
     margin-top: 6rpx;
-    font-size: 20rpx;
+    font-size: 24rpx;
     color: var(--ink-faint);
   }
 
@@ -79,7 +79,7 @@ defineProps<{ account: Account }>();
   .quota-note {
     display: block;
     margin-top: 18rpx;
-    font-size: 22rpx;
+    font-size: 24rpx;
     color: var(--ink-soft);
   }
 

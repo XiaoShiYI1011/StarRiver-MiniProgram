@@ -5,7 +5,11 @@
       <view class="account-who">
         <text class="account-email">{{ account ? account.email : "还未绑定账号" }}</text>
         <text class="account-description">
-          {{ account ? `微信已绑定 · 注册于 ${account.registeredAt}` : "绑定后查看作品、权益与订单" }}
+          {{
+            account
+              ? `${isWeChatAuth ? "微信已绑定" : "演示账号"} · 注册于 ${account.registeredAt}`
+              : "绑定后查看作品、权益与订单"
+          }}
         </text>
       </view>
       <text v-if="account" class="status-tag">已绑定</text>
@@ -16,6 +20,7 @@
 
 <script setup lang="ts">
 import type { Account } from "@/types/studio";
+import { isWeChatAuth } from "@/config/api";
 defineProps<{ account: Account | null }>();
 const emit = defineEmits<{ bind: [] }>();
 </script>
@@ -57,7 +62,7 @@ const emit = defineEmits<{ bind: [] }>();
   .account-description {
     display: block;
     margin-top: 4rpx;
-    font-size: 22rpx;
+    font-size: 24rpx;
     color: var(--ink-soft);
   }
 

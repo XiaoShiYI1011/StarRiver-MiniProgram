@@ -56,7 +56,7 @@ const emit = defineEmits<{ select: [plan: Plan] }>();
     top: -18rpx;
     right: 28rpx;
     padding: 6rpx 20rpx;
-    font-size: 20rpx;
+    font-size: 24rpx;
     font-weight: 700;
     color: #fff;
     background: var(--accent);
@@ -81,7 +81,7 @@ const emit = defineEmits<{ select: [plan: Plan] }>();
   }
 
   .plan-period {
-    font-size: 22rpx;
+    font-size: 24rpx;
     font-weight: 400;
     color: var(--ink-soft);
   }

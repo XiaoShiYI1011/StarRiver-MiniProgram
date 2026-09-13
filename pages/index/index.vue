@@ -1,7 +1,8 @@
 <template>
-  <AppPage :scroll-into-view="scrollTarget">
+  <AppPage :scroll-top="scrollTop" @scroll="trackScroll">
     <template #mainContent>
-      <view class="page-stack">
+      <view id="home-content" class="page-stack">
+        <AuthStatusNotice />
         <HomeHero :bound="isBound" @start="start" @learn="showCapabilities" />
         <view id="capabilities">
           <SectionHeading eyebrow="围绕长篇创作设计" title="写正文，也管理故事为什么成立" />
@@ -36,6 +37,7 @@ import CreationSteps from "./components/CreationSteps.vue";
 import FaqList from "./components/FaqList.vue";
 import { useStudio } from "@/composables/useStudio";
 import { openBind, openMainTab } from "@/utils/navigation";
+import AuthStatusNotice from "@/components/layout/AuthStatusNotice.vue";
 
 const { isBound, refresh } = useStudio();
 
@@ -43,12 +45,27 @@ onShow(() => {
   void refresh();
 });
 
-const scrollTarget = ref("");
+const scrollTop = ref(0);
+let actualScrollTop = 0;
+const trackScroll = (event: unknown) => {
+  actualScrollTop = (event as { detail: { scrollTop: number } }).detail.scrollTop;
+};
 const start = () => (isBound.value ? openMainTab("mine") : openBind());
-const showCapabilities = async () => {
-  scrollTarget.value = "";
-  await nextTick();
-  scrollTarget.value = "capabilities";
+const showCapabilities = () => {
+  // 小程序 scroll-into-view 无法可靠定位跨组件插槽中的节点。
+  uni
+    .createSelectorQuery()
+    .select("#home-content")
+    .boundingClientRect()
+    .select("#capabilities")
+    .boundingClientRect()
+    .exec(async (nodes) => {
+      const [content, target] = nodes as UniApp.NodeInfo[];
+      if (typeof content?.top !== "number" || typeof target?.top !== "number") return;
+      scrollTop.value = actualScrollTop;
+      await nextTick();
+      scrollTop.value = Math.max(0, target.top - content.top);
+    });
 };
 </script>
 

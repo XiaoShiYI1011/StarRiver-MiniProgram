@@ -1,66 +1,99 @@
 <template>
   <view class="page-stack binding-form-page">
     <view class="surface-card">
-      <form class="binding-form" @submit="submit">
-        <view class="form-field">
-          <text class="field-label">星河创作账号邮箱</text>
-          <input
-            v-model="email"
-            class="field-input"
-            type="text"
-            :maxlength="100"
-            placeholder="you@example.com"
-            aria-label="星河创作账号邮箱"
-            :disabled="busy"
-          />
-        </view>
-        <view class="form-field">
-          <text class="field-label">{{ mode === "code" ? "邮箱验证码" : "账号密码" }}</text>
-          <view class="field-row">
+      <form @submit="submit">
+        <view class="binding-form">
+          <view class="form-field">
+            <text class="field-label">星河创作账号邮箱</text>
             <input
-              v-model="credential"
+              v-model="email"
               class="field-input"
-              :type="mode === 'code' ? 'number' : 'text'"
-              :password="mode === 'password'"
-              :maxlength="mode === 'code' ? 6 : 64"
-              :placeholder="mode === 'code' ? '6 位验证码' : '请输入密码'"
-              :aria-label="mode === 'code' ? '邮箱验证码' : '账号密码'"
+              type="text"
+              :maxlength="320"
+              placeholder="you@example.com"
+              aria-label="星河创作账号邮箱"
               :disabled="busy"
             />
-            <button v-if="mode === 'code'" class="code-button" :disabled="!canSend || busy" @tap="requestCode">
-              {{ sending ? "获取中" : remaining ? `${remaining}s 后重试` : "获取验证码" }}
-            </button>
           </view>
+          <view class="form-field">
+            <text class="field-label">{{ mode === "code" ? "邮箱验证码" : "账号密码" }}</text>
+            <view class="field-row">
+              <input
+                v-model="credential"
+                class="field-input"
+                :type="mode === 'code' ? 'number' : 'text'"
+                :password="mode === 'password'"
+                :maxlength="mode === 'code' ? 6 : 128"
+                :placeholder="mode === 'code' ? '6 位验证码' : '请输入密码'"
+                :aria-label="mode === 'code' ? '邮箱验证码' : '账号密码'"
+                :disabled="busy"
+              />
+              <button
+                v-if="mode === 'code'"
+                class="code-button"
+                :class="{ 'code-button--disabled': !canSend || busy }"
+                :disabled="!canSend || busy"
+                @tap="requestCode"
+              >
+                {{ sending ? "获取中" : remaining ? `${remaining}s 后重试` : "获取验证码" }}
+              </button>
+            </view>
+          </view>
+          <text v-if="codeSent && mode === 'code'" class="demo-hint">
+            {{
+              isWeChatAuth
+                ? "若邮箱对应已激活账号，验证码将发送至该邮箱，5 分钟内有效。"
+                : "演示验证码：123456（5 分钟内有效，不发送邮件）"
+            }}
+          </text>
+          <text v-if="mode === 'password' && !isWeChatAuth" class="demo-hint">
+            演示密码：demo123456，请勿填写真实密码。
+          </text>
+          <checkbox-group @change="agreed = $event.detail.value.includes('agree')">
+            <label class="agreement">
+              <checkbox
+                class="agreement-check"
+                value="agree"
+                :checked="agreed"
+                :disabled="busy"
+                color="#1b4bff"
+                aria-label="同意用户协议和隐私政策"
+              />
+              <view>
+                我已阅读并同意
+                <text class="agreement-link" @tap.stop="openDocument('terms')">《用户协议》</text>
+                与
+                <text class="agreement-link" @tap.stop="openDocument('privacy')">《隐私政策》</text>
+                ，确认对所创作内容拥有合法权利。
+                <text class="agreement-note">
+                  {{
+                    isWeChatAuth
+                      ? "绑定会验证微信身份及邮箱凭证；创作权益与订单仍为演示数据。"
+                      : "当前为本地演示流程，协议内容为展示占位。"
+                  }}
+                </text>
+              </view>
+            </label>
+          </checkbox-group>
+          <text v-if="error" class="error-text" role="alert">{{ error }}</text>
+          <button class="primary-button" form-type="submit" :disabled="busy" :loading="busy">绑定并登录</button>
         </view>
-        <text v-if="codeSent && mode === 'code'" class="demo-hint">演示验证码：123456（5 分钟内有效，不发送邮件）</text>
-        <text v-if="mode === 'password'" class="demo-hint">演示密码：demo123456，请勿填写真实密码。</text>
-        <text v-if="error" class="error-text" role="alert">{{ error }}</text>
-        <button class="primary-button" form-type="submit" :disabled="busy" :loading="busy">绑定并登录</button>
       </form>
       <view class="binding-divider">
-        <view />
+        <view class="binding-divider__line" />
         <text>或</text>
-        <view />
+        <view class="binding-divider__line" />
       </view>
       <button class="text-button binding-switch" :disabled="busy" @tap="toggleMode">
         {{ mode === "code" ? "使用邮箱密码登录并绑定" : "使用邮箱验证码登录并绑定" }}
       </button>
-      <text class="binding-note">还没有账号？验证通过后将自动以该邮箱创建演示账号。</text>
-    </view>
-    <view class="agreement">
-      <checkbox-group @change="agreed = $event.detail.value.includes('agree')">
-        <label class="agreement-check">
-          <checkbox value="agree" :checked="agreed" color="#1b4bff" aria-label="同意演示协议" />
-        </label>
-      </checkbox-group>
-      <view>
-        我已阅读并同意
-        <text class="agreement-link" @tap="openDocument('terms')">《用户协议》</text>
-        与
-        <text class="agreement-link" @tap="openDocument('privacy')">《隐私政策》</text>
-        ，确认对所创作内容拥有合法权利。
-        <text class="agreement-note">当前为本地演示流程，协议内容为展示占位。</text>
-      </view>
+      <text class="binding-note">
+        {{
+          isWeChatAuth
+            ? "请使用已激活的星河创作账号。没有账号请先在电脑端注册，或联系管理员。"
+            : "还没有账号？验证通过后将自动以该邮箱创建演示账号。"
+        }}
+      </text>
     </view>
   </view>
 </template>
@@ -68,6 +101,7 @@
 <script setup lang="ts">
 import { useBinding } from "../composables/useBinding";
 import { openDocument } from "@/utils/navigation";
+import { isWeChatAuth } from "@/config/api";
 
 const emit = defineEmits<{ success: [] }>();
 const {
@@ -99,6 +133,10 @@ const {
     display: flex;
     flex-direction: column;
     gap: 12rpx;
+
+    > .field-input {
+      flex: none;
+    }
   }
 
   .field-label {
@@ -146,12 +184,12 @@ const {
     border: 0;
   }
 
-  .code-button[disabled] {
+  .code-button--disabled {
     color: var(--ink-faint);
   }
 
   .demo-hint {
-    font-size: 22rpx;
+    font-size: 24rpx;
     color: var(--accent);
   }
 
@@ -160,11 +198,11 @@ const {
     gap: 24rpx;
     align-items: center;
     margin: 32rpx 0 24rpx;
-    font-size: 22rpx;
+    font-size: 24rpx;
     color: var(--ink-faint);
   }
 
-  .binding-divider view {
+  .binding-divider__line {
     flex: 1;
     height: 1px;
     background: var(--line);
@@ -179,7 +217,7 @@ const {
   .binding-note {
     display: block;
     margin-top: 16rpx;
-    font-size: 22rpx;
+    font-size: 24rpx;
     color: var(--ink-faint);
     text-align: center;
   }
@@ -189,15 +227,14 @@ const {
     gap: 12rpx;
     align-items: flex-start;
     padding: 0 12rpx;
-    font-size: 23rpx;
+    font-size: 24rpx;
     line-height: 1.6;
     color: var(--ink-soft);
   }
 
   .agreement-check {
     display: block;
-    transform: scale(0.8);
-    transform-origin: top left;
+    flex-shrink: 0;
   }
 
   .agreement-link {
@@ -207,7 +244,7 @@ const {
   .agreement-note {
     display: block;
     margin-top: 12rpx;
-    font-size: 21rpx;
+    font-size: 24rpx;
     color: var(--ink-faint);
   }
 }

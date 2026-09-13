@@ -1,8 +1,8 @@
 <template>
   <view class="app-page" :class="[`app-page--${theme}`, { 'app-page--safe-bottom': safeAreaBottom }]">
     <view v-if="showNavigation" class="app-page__navigation" :style="navigationStyle">
-      <view class="app-page__navigation-inner" :style="{ minHeight: `${metrics.navigationHeight}px` }">
-        <slot name="navigationBar">
+      <slot name="navigationBar">
+        <view class="app-page__navigation-inner" :style="{ minHeight: `${metrics.navigationHeight}px` }">
           <button v-if="showBack" class="app-page__icon-button" aria-label="返回上一页" @tap="handleBack">
             <view class="app-page__back-icon" />
           </button>
@@ -22,8 +22,8 @@
               <AppIcon :name="theme === 'dark' ? 'moon' : 'sun'" tone="muted" :size="18" />
             </button>
           </view>
-        </slot>
-      </view>
+        </view>
+      </slot>
     </view>
     <view v-if="$slots.pageHeader" class="app-page__header">
       <slot name="pageHeader" />
@@ -229,7 +229,7 @@ onUnmounted(() => {
   --surface-strong: rgb(255 255 255 / 92%);
   --ink: #111827;
   --ink-soft: #667085;
-  --ink-faint: #8791a5;
+  --ink-faint: #667085;
   --line: rgb(17 24 39 / 10%);
   --accent: #1b4bff;
   --accent-wash: rgb(27 75 255 / 9%);
@@ -265,7 +265,7 @@ onUnmounted(() => {
     --surface-strong: rgb(18 23 34 / 92%);
     --ink: #f5f7ff;
     --ink-soft: #a7b0c3;
-    --ink-faint: #78839a;
+    --ink-faint: #a7b0c3;
     --line: rgb(255 255 255 / 11%);
     --accent: #6e8bff;
     --accent-wash: rgb(110 139 255 / 13%);
@@ -336,8 +336,8 @@ onUnmounted(() => {
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     padding: 0;
     margin: 0;
     line-height: 1;
