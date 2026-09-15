@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import AppIcon from "@/components/ui/AppIcon.vue";
 import { formatDate, formatYuan } from "@/utils/format";
-import { BillingOrderStatus, BillingOrderType } from "@/types/billing";
+import { BillingOrderStatus, BillingOrderType } from "@/packages/account/types/billing";
 import type { BillingOrder } from "@/types/billing";
 
 defineProps<{ orders: BillingOrder[] }>();

@@ -1,9 +1,8 @@
 import { ref } from "vue";
 import { useStudio } from "@/composables/useStudio";
-import { billingApi } from "@/api/billing";
+import { billingApi, newIdempotencyKey } from "@/api/billing";
 import { openBind } from "@/utils/navigation";
 import { errorMessage } from "@/utils/format";
-import { newIdempotencyKey } from "@/utils/idempotency";
 import type { WritingPlanProduct } from "@/types/billing";
 
 export type CheckoutSelection =

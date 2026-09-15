@@ -1,21 +1,9 @@
 /** 与后端 BillingManager 的 VO 保持同构；金额一律为分。 */
 
-export enum BillingOrderType {
-  WritingPlan = 1,
-  CreditRecharge = 2,
-}
-
-export enum BillingOrderStatus {
-  Pending = 1,
-  Paid = 2,
-  Cancelled = 3,
-  Refunded = 4,
-}
-
-export enum ProductStatus {
-  Disabled = 1,
-  Enabled = 2,
-}
+// 公共数据契约仅引用类型，运行时枚举随实际使用的分包加载。
+import type { BillingOrderStatus, BillingOrderType } from "@/packages/account/types/billing";
+import type { ProductStatus } from "@/packages/shop/types/billing";
+export type { BillingOrderStatus, BillingOrderType, ProductStatus };
 
 export interface WritingPlanProduct {
   id: string;

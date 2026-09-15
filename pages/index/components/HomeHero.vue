@@ -1,6 +1,6 @@
 <template>
   <view class="hero">
-    <text class="hero-kicker">● 长篇小说创作工作台</text>
+    <!--<text class="hero-kicker">● 星河创作工作台</text>-->
     <text class="hero-title">星河创作</text>
     <text class="hero-lead">从灵感、设定到章节正文，让人物、世界观与伏笔始终沿着同一条叙事线生长。</text>
     <view class="hero-actions">

@@ -74,12 +74,14 @@
       </view>
     </view>
     <slot name="dialogContainer" />
+    <DebugPanel />
   </view>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import AppIcon from "@/components/ui/AppIcon.vue";
+import DebugPanel from "@/components/debug/DebugPanel.vue";
 import { onHide, onShow } from "@dcloudio/uni-app";
 import { getPageMetrics } from "@/layout/pageMetrics";
 import { resolvedPageTheme, setPageSystemTheme, setPageTheme, syncPageTheme } from "@/composables/usePageTheme";

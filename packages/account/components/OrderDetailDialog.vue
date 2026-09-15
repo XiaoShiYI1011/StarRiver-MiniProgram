@@ -30,10 +30,9 @@
 import { ref, watch } from "vue";
 import AppDialog from "@/components/ui/AppDialog.vue";
 import { refreshDashboard } from "@/composables/useStudio";
-import { billingApi } from "@/api/billing";
+import { billingApi, newIdempotencyKey } from "@/api/billing";
 import { errorMessage, formatDate, formatNumber, formatYuan } from "@/utils/format";
-import { newIdempotencyKey } from "@/utils/idempotency";
-import { BillingOrderStatus } from "@/types/billing";
+import { BillingOrderStatus } from "@/packages/account/types/billing";
 import type { BillingOrder } from "@/types/billing";
 
 const props = defineProps<{ order: BillingOrder | null }>();

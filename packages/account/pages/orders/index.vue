@@ -34,7 +34,7 @@ import OrderList from "../../components/OrderList.vue";
 import OrderDetailDialog from "../../components/OrderDetailDialog.vue";
 import { useStudio } from "@/composables/useStudio";
 import { goHome } from "@/utils/navigation";
-import { BillingOrderStatus } from "@/types/billing";
+import { BillingOrderStatus } from "@/packages/account/types/billing";
 import type { BillingOrder } from "@/types/billing";
 
 const { dashboard, refresh } = useStudio();

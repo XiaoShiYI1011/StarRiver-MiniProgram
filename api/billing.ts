@@ -6,6 +6,9 @@ const planPrefix = "/api/assistant/v1/Plan";
 const creditPrefix = "/api/assistant/v1/Credit";
 const orderPrefix = "/api/assistant/v1/Order";
 
+/** 下单和支付共用的幂等键，随计费接口加载，避免生成仅分包使用的主包脚本。 */
+export const newIdempotencyKey = () => `mini-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+
 export const billingApi = {
   queryProducts: () => request<WritingPlanProduct[]>({ url: `${planPrefix}/QueryProducts`, method: "GET" }),
   queryCreditSummary: () => request<CreditSummary>({ url: `${creditPrefix}/QueryCreditSummary`, method: "GET" }),

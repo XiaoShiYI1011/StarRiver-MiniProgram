@@ -59,7 +59,7 @@ import { miniAuthClient } from "@/services/auth/miniAuthClient";
 import { useStudio } from "@/composables/useStudio";
 import { openBind } from "@/utils/navigation";
 import { errorMessage } from "@/utils/format";
-import { ProductStatus } from "@/types/billing";
+import { ProductStatus } from "@/packages/shop/types/billing";
 import type { CreditSummary, WritingPlanProduct } from "@/types/billing";
 
 const products = ref<WritingPlanProduct[]>([]);
