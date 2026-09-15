@@ -1,5 +1,7 @@
-/** 开发者工具默认连接本机后端；真机/发行前改为已配置 request 合法域名的 HTTPS 地址。 */
-export const API_BASE_URL = "http://127.0.0.1:5008";
+const normalizeBaseUrl = (value: string) => value.trim().replace(/\/+$/, "");
+
+/** 后端地址只在 .env 系列文件的 VITE_API_BASE_URL 中维护，此处是唯一读取点。 */
+export const API_BASE_URL = normalizeBaseUrl(import.meta.env.VITE_API_BASE_URL || "");
 
 let nativeAuth = false;
 // #ifdef MP-WEIXIN

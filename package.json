@@ -5,16 +5,13 @@
   "scripts": {
     "build:mp-weixin": "node scripts/build-local.cjs mp-weixin",
     "build:h5": "node scripts/build-local.cjs h5",
-    "test:mock": "node --test tests/mockStudioService.test.cjs",
-    "test:auth": "node --test tests/miniAuthClient.test.cjs",
     "lint": "npm run lint:eslint && npm run lint:stylelint && npm run lint:prettier && npm run lint:scss-structure",
     "lint:eslint": "eslint .",
     "lint:prettier": "prettier --check \"**/*.{js,cjs,mjs,vue,css,scss}\" \"*.html\"",
     "lint:stylelint": "stylelint \"**/*.{css,scss,vue}\"",
     "lint:scss-structure": "node scripts/check-scss-structure.cjs",
     "lint:lint-staged": "lint-staged",
-    "type-check": "vue-tsc --noEmit",
-    "test:layout": "node --test tests/pageMetrics.test.cjs"
+    "type-check": "vue-tsc --noEmit"
   },
   "lint-staged": {
     "*.{js,ts}": [

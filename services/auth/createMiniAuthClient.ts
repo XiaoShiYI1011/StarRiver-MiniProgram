@@ -2,7 +2,11 @@ import type { AuthUser, MiniSession, StoredSession } from "@/types/auth";
 import type { BindInput } from "@/types/studio";
 
 interface Dependencies {
-  request<T>(action: string, data?: object, token?: string): Promise<T>;
+  autoLogin(wxCode: string): Promise<MiniSession>;
+  getCurrentUser(token: string): Promise<AuthUser>;
+  sendEmailCode(input: { email: string }): Promise<{ retryAfter: number }>;
+  bind(input: BindInput & { wxCode: string }): Promise<MiniSession>;
+  logout(token: string): Promise<void>;
   wxCode(): Promise<string>;
   read(key: string): unknown;
   write(key: string, value: unknown): void;
@@ -11,7 +15,7 @@ interface Dependencies {
 
 const sessionKey = "nwa-mini-session-v1";
 const logoutKey = "nwa-mini-manual-logout-v1";
-const statusOf = (error: unknown) => (error as { status?: number })?.status;
+const statusOf = (error: unknown) => (error as { statusCode?: number })?.statusCode;
 
 /** 身份状态仅来自后端；不读取演示账号、演示验证码或演示权益。 */
 export const createMiniAuthClient = (dependencies: Dependencies) => {
@@ -50,7 +54,7 @@ export const createMiniAuthClient = (dependencies: Dependencies) => {
     pending = (async () => {
       if (session && Date.parse(session.expiresAtUtc) > Date.now()) {
         try {
-          const current = await dependencies.request<AuthUser>("GetCurrentUser", undefined, session.accessToken);
+          const current = await dependencies.getCurrentUser(session.accessToken);
           if (version !== generation) return user;
           user = current;
           checkedAt = Date.now();
@@ -74,7 +78,7 @@ export const createMiniAuthClient = (dependencies: Dependencies) => {
       if (attempted) return user;
       try {
         const wxCode = await dependencies.wxCode();
-        const result = await dependencies.request<MiniSession>("AutoLogin", { wxCode });
+        const result = await dependencies.autoLogin(wxCode);
         return accept(result, version);
       } catch (error) {
         if (version !== generation) return user;
@@ -93,7 +97,7 @@ export const createMiniAuthClient = (dependencies: Dependencies) => {
   return {
     restore,
     async requestCode(email: string) {
-      return dependencies.request<{ retryAfter: number }>("SendEmailCode", { email: email.trim() });
+      return dependencies.sendEmailCode({ email: email.trim() });
     },
     async bind(input: BindInput) {
       if (!input.agreed) throw new Error("请先勾选用户协议与隐私政策");
@@ -102,14 +106,14 @@ export const createMiniAuthClient = (dependencies: Dependencies) => {
       if (pending) await pending.catch(() => null);
       const version = ++generation;
       const wxCode = await dependencies.wxCode();
-      const result = await dependencies.request<MiniSession>("Bind", { ...input, email: input.email.trim(), wxCode });
+      const result = await dependencies.bind({ ...input, email: input.email.trim(), wxCode });
       accept(result, version);
     },
     async logout() {
       if (pending) await pending.catch(() => null);
       if (session) {
         try {
-          await dependencies.request("Logout", {}, session.accessToken);
+          await dependencies.logout(session.accessToken);
         } catch (error) {
           if (statusOf(error) !== 401) throw error;
         }
