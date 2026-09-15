@@ -1,5 +1,4 @@
-import type { AuthUser, MiniSession, StoredSession } from "@/types/auth";
-import type { BindInput } from "@/types/studio";
+import type { AuthUser, BindInput, MiniSession, StoredSession } from "@/types/auth";
 
 interface Dependencies {
   autoLogin(wxCode: string): Promise<MiniSession>;
@@ -13,11 +12,19 @@ interface Dependencies {
   remove(key: string): void;
 }
 
-const sessionKey = "nwa-mini-session-v1";
+const validPair = (pair: StoredSession) =>
+  Boolean(
+    pair.accessToken &&
+    pair.refreshToken &&
+    pair.sessionId &&
+    Number.isSafeInteger(pair.sessionVersion) &&
+    Number.isFinite(Date.parse(pair.sessionExpiresAtUtc))
+  );
+const sessionKey = "nwa-mini-jwt-pair";
 const logoutKey = "nwa-mini-manual-logout-v1";
 const statusOf = (error: unknown) => (error as { statusCode?: number })?.statusCode;
 
-/** 身份状态仅来自后端；不读取演示账号、演示验证码或演示权益。 */
+/** 身份状态仅来自后端接口。 */
 export const createMiniAuthClient = (dependencies: Dependencies) => {
   let session: StoredSession | null = null;
   let user: AuthUser | null = null;
@@ -26,17 +33,18 @@ export const createMiniAuthClient = (dependencies: Dependencies) => {
   let generation = 0;
   let pending: Promise<AuthUser | null> | null = null;
   const stored = dependencies.read(sessionKey) as StoredSession | undefined;
-  if (stored && typeof stored.accessToken === "string" && Number.isFinite(Date.parse(stored.expiresAtUtc))) {
+  if (stored && validPair(stored)) {
     session = stored;
   }
   let manuallyLoggedOut = dependencies.read(logoutKey) === true;
 
   const accept = (result: MiniSession, version: number) => {
     if (version !== generation) return user;
-    if (!result.user?.id || !result.accessToken || !Number.isFinite(Date.parse(result.expiresAtUtc))) {
+    if (!result.user?.id || !validPair(result)) {
       throw new Error("登录结果异常，请重试");
     }
-    session = { accessToken: result.accessToken, expiresAtUtc: result.expiresAtUtc };
+    const { user: _user, ...pair } = result;
+    session = pair;
     user = result.user;
     checkedAt = Date.now();
     manuallyLoggedOut = false;
@@ -46,13 +54,41 @@ export const createMiniAuthClient = (dependencies: Dependencies) => {
     return user;
   };
 
+  const invalidate = (
+    code: string,
+    requestGeneration: number,
+    sid: string | undefined,
+    version: number | undefined
+  ) => {
+    if (
+      requestGeneration !== generation ||
+      !session ||
+      sid !== session.sessionId ||
+      version !== session.sessionVersion ||
+      !code.startsWith("AUTH_") ||
+      code === "AUTH_FORBIDDEN" ||
+      code === "AUTH_DEPENDENCY_UNAVAILABLE"
+    )
+      return;
+    const naturalExpiry = code === "AUTH_REFRESH_EXPIRED" || code === "AUTH_SESSION_EXPIRED";
+    generation++;
+    session = null;
+    user = null;
+    checkedAt = 0;
+    manuallyLoggedOut = !naturalExpiry;
+    attempted = !naturalExpiry;
+    dependencies.remove(sessionKey);
+    if (manuallyLoggedOut) dependencies.write(logoutKey, true);
+  };
+
   const restore = async (): Promise<AuthUser | null> => {
     if (manuallyLoggedOut) return null;
-    if (user && session && Date.parse(session.expiresAtUtc) > Date.now() && Date.now() - checkedAt < 60000) return user;
+    if (user && session && Date.parse(session.sessionExpiresAtUtc) > Date.now() && Date.now() - checkedAt < 60000)
+      return user;
     if (pending) return pending;
     const version = generation;
     pending = (async () => {
-      if (session && Date.parse(session.expiresAtUtc) > Date.now()) {
+      if (session && Date.parse(session.sessionExpiresAtUtc) > Date.now()) {
         try {
           const current = await dependencies.getCurrentUser(session.accessToken);
           if (version !== generation) return user;
@@ -62,6 +98,11 @@ export const createMiniAuthClient = (dependencies: Dependencies) => {
         } catch (error) {
           if (version !== generation) return user;
           if (statusOf(error) !== 401 && statusOf(error) !== 403) throw error;
+          const code = (error as { code?: string }).code;
+          if (code && session) {
+            invalidate(code, version, session.sessionId, session.sessionVersion);
+            if (manuallyLoggedOut) return null;
+          }
           session = null;
           user = null;
           dependencies.remove(sessionKey);
@@ -69,7 +110,7 @@ export const createMiniAuthClient = (dependencies: Dependencies) => {
           attempted = false;
         }
       }
-      if (session && Date.parse(session.expiresAtUtc) <= Date.now()) {
+      if (session && Date.parse(session.sessionExpiresAtUtc) <= Date.now()) {
         session = null;
         user = null;
         attempted = false;
@@ -96,6 +137,41 @@ export const createMiniAuthClient = (dependencies: Dependencies) => {
 
   return {
     restore,
+    invalidate,
+    /** 当前会话令牌；未登录时为 undefined。请求封装通过 setAuthTokenProvider 读取。 */
+    getToken: () => session?.accessToken,
+    getPair: () => session,
+    getGeneration: () => generation,
+    syncPair(headers: Record<string, unknown>, requestGeneration: number) {
+      if (requestGeneration !== generation || !session) return;
+      const values = Object.fromEntries(
+        Object.entries(headers).map(([key, value]) => [key.toLowerCase(), String(value)])
+      );
+      const accessToken = values["access-token"],
+        refreshToken = values["x-access-token"];
+      if (!accessToken && !refreshToken) return;
+      if (!accessToken || !refreshToken) throw new Error("换发凭据不完整");
+      const sessionVersion = Number(values["x-auth-session-version"]);
+      if (
+        values["x-auth-session-id"] !== session.sessionId ||
+        !Number.isSafeInteger(sessionVersion) ||
+        sessionVersion <= session.sessionVersion
+      )
+        return;
+      // 小程序无需解析 JWT；有效性和刷新由服务端控制，绝对期限由响应头同步。
+      const pair = {
+        ...session,
+        accessToken,
+        refreshToken,
+        sessionVersion,
+        accessExpiresAtUtc: values["x-auth-access-expires-at"],
+        refreshExpiresAtUtc: values["x-auth-refresh-expires-at"],
+        sessionExpiresAtUtc: values["x-auth-session-expires-at"],
+      };
+      if (!validPair(pair)) throw new Error("换发会话格式无效");
+      dependencies.write(sessionKey, pair);
+      session = pair;
+    },
     async requestCode(email: string) {
       return dependencies.sendEmailCode({ email: email.trim() });
     },

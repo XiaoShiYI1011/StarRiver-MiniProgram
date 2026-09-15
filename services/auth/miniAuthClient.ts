@@ -1,6 +1,7 @@
 import { createMiniAuthClient } from "./createMiniAuthClient";
 import { getWeChatCode } from "./wechatLogin";
 import { miniAuthApi } from "@/api/miniAuth";
+import { setAuthProvider } from "@/utils/request";
 
 export const miniAuthClient = createMiniAuthClient({
   autoLogin: miniAuthApi.autoLogin,
@@ -19,3 +20,6 @@ export const miniAuthClient = createMiniAuthClient({
   write: (key, value) => uni.setStorageSync(key, value),
   remove: (key) => uni.removeStorageSync(key),
 });
+
+// 所有业务请求共享同一个原子存储的双 JWT 会话。
+setAuthProvider(miniAuthClient);

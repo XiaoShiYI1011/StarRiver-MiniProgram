@@ -1,6 +1,5 @@
 import { request } from "@/utils/request";
-import type { AuthUser, MiniSession } from "@/types/auth";
-import type { BindInput } from "@/types/studio";
+import type { AuthUser, BindInput, MiniSession } from "@/types/auth";
 
 /**
  * MiniAuth 控制器地址在此唯一定义：改后端地址只动 .env，改接口路径只动本文件。

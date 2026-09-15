@@ -1,3 +1,4 @@
+import type { StoredSession } from "@/types/auth";
 import { API_BASE_URL } from "@/config/api";
 import { ApiError } from "@/types/api";
 import type { ApiEnvelope, RequestOptions } from "@/types/api";
@@ -5,7 +6,7 @@ import type { ApiEnvelope, RequestOptions } from "@/types/api";
 /**
  * 全项目唯一的请求封装，与 web 端 utils/request.ts 保持同一套约定：
  * 信封校验与解包、错误归一化为 ApiError、401 广播 assistant:unauthorized。
- * 平台差异：小程序用 Bearer 令牌替代 Cookie + CSRF；下载与 SSE 不在此层。
+ * Web 和小程序均使用双 JWT 请求头与响应头无感换发。
  */
 interface RequestConfig extends RequestOptions {
   url: string;
@@ -18,6 +19,16 @@ interface RequestConfig extends RequestOptions {
 }
 
 const defaultTimeoutMs = 30_000;
+
+let auth = {
+  getPair: (): StoredSession | null => null,
+  getGeneration: () => 0,
+  invalidate: (_code: string, _generation: number, _sid: string | undefined, _version: number | undefined): void => {},
+  syncPair: (_headers: Record<string, unknown>, _generation: number): void => {},
+};
+export const setAuthProvider = (provider: typeof auth) => {
+  auth = provider;
+};
 
 const isRecord = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === "object";
 
@@ -96,6 +107,9 @@ const assertUsableBaseUrl = () => {
 
 export const request = async <T>(config: RequestConfig): Promise<T> => {
   assertUsableBaseUrl();
+  const pair = auth.getPair();
+  const generation = auth.getGeneration();
+  const token = config.token || pair?.accessToken;
   return new Promise<T>((resolve, reject) => {
     uni.request({
       url: appendQuery(`${API_BASE_URL}${config.url}`, config.params),
@@ -104,9 +118,16 @@ export const request = async <T>(config: RequestConfig): Promise<T> => {
       timeout: config.timeout ?? defaultTimeoutMs,
       header: {
         "Content-Type": "application/json;charset=utf-8",
-        ...(config.token ? { Authorization: `Bearer ${config.token}` } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(pair && token === pair.accessToken ? { "X-Authorization": `Bearer ${pair.refreshToken}` } : {}),
       },
       success(response) {
+        try {
+          auth.syncPair(response.header || {}, generation);
+        } catch (error) {
+          reject(error);
+          return;
+        }
         const body: unknown = response.data;
         if (!isApiEnvelope(body)) {
           reject(new ApiError("服务响应格式不符合约定。", response.statusCode, "INVALID_RESPONSE_CONTRACT", body));
@@ -114,7 +135,14 @@ export const request = async <T>(config: RequestConfig): Promise<T> => {
         }
         if (!body.succeeded || body.statusCode < 200 || body.statusCode >= 300) {
           const error = toApiError(response.statusCode, body);
-          notifyUnauthorized(error.statusCode, config.skipAuthRedirect);
+          const currentRequest =
+            generation === auth.getGeneration() &&
+            pair?.sessionId === auth.getPair()?.sessionId &&
+            pair?.sessionVersion === auth.getPair()?.sessionVersion;
+          if (currentRequest) {
+            auth.invalidate(error.code || "", generation, pair?.sessionId, pair?.sessionVersion);
+            notifyUnauthorized(error.statusCode, config.skipAuthRedirect);
+          }
           reject(error);
           return;
         }
