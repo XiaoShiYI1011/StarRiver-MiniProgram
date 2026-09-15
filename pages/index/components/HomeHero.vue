@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { highlights } from "@/mocks/home";
+import { highlights } from "@/content/home";
 import EditorPreview from "./EditorPreview.vue";
 
 defineProps<{ bound: boolean }>();

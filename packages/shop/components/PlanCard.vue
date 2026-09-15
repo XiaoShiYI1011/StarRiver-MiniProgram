@@ -1,29 +1,25 @@
 <template>
-  <view class="plan-card" :class="{ 'plan-card--recommended': plan.recommended }">
-    <text v-if="plan.recommended" class="plan-badge">推荐</text>
+  <view class="plan-card" :class="{ 'plan-card--recommended': plan.isRecommended }">
+    <text v-if="plan.isRecommended" class="plan-badge">推荐</text>
     <view class="plan-heading">
       <text class="plan-name">{{ plan.name }}</text>
       <text class="plan-price">
-        ¥{{ plan.price }}
-        <text class="plan-period">/ {{ plan.days }}天</text>
+        ¥{{ formatYuan(plan.priceFen) }}
+        <text class="plan-period">/ {{ plan.durationDays }}天</text>
       </text>
     </view>
     <text class="plan-description">{{ plan.description }}</text>
     <view class="plan-features">
       <view class="plan-feature">
         <AppIcon name="check" :size="15" />
-        <text>8 小时创作额度 {{ formatNumber(plan.eightHourQuota) }} 积分</text>
+        <text>8 小时创作额度 {{ formatNumber(plan.eightHourCredits) }} 积分</text>
       </view>
       <view class="plan-feature">
         <AppIcon name="check" :size="15" />
-        <text>7 天创作额度 {{ formatNumber(plan.weeklyQuota) }} 积分</text>
-      </view>
-      <view v-for="feature in plan.features" :key="feature" class="plan-feature">
-        <AppIcon name="check" :size="15" />
-        <text>{{ feature }}</text>
+        <text>7 天创作额度 {{ formatNumber(plan.sevenDayCredits) }} 积分</text>
       </view>
     </view>
-    <button :class="plan.recommended ? 'primary-button' : 'secondary-button'" @tap="emit('select', plan)">
+    <button :class="plan.isRecommended ? 'primary-button' : 'secondary-button'" @tap="emit('select', plan)">
       开通{{ plan.name }}
     </button>
   </view>
@@ -31,11 +27,11 @@
 
 <script setup lang="ts">
 import AppIcon from "@/components/ui/AppIcon.vue";
-import { formatNumber } from "@/utils/format";
-import type { Plan } from "@/types/studio";
+import { formatNumber, formatYuan } from "@/utils/format";
+import type { WritingPlanProduct } from "@/types/billing";
 
-defineProps<{ plan: Plan }>();
-const emit = defineEmits<{ select: [plan: Plan] }>();
+defineProps<{ plan: WritingPlanProduct }>();
+const emit = defineEmits<{ select: [plan: WritingPlanProduct] }>();
 </script>
 
 <style lang="scss" scoped>

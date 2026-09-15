@@ -2,14 +2,7 @@
   <AppPage refresher-enabled :refresher-triggered="refreshing" @refresh="reload">
     <template #mainContent>
       <view class="page-stack">
-        <PageHeading
-          title="我的"
-          :description="
-            isWeChatAuth
-              ? '管理账号与创作权益。套餐、作品和订单为演示内容。'
-              : 'H5 原型预览：账号、权益与订单均为本地演示数据。'
-          "
-        />
+        <PageHeading title="我的" description="管理账号与创作权益。写作请在电脑端进行。" />
         <AuthStatusNotice />
         <AccountCard :account="account" @bind="openBind()" />
         <EntitlementCard v-if="account" :account="account" />
@@ -42,13 +35,7 @@
     <template #dialogContainer>
       <OrderDetailDialog :order="selectedOrder" @close="selectedOrder = null" />
       <AppDialog :open="logoutOpen" title="退出登录" :busy="loggingOut" @close="logoutOpen = false">
-        <text class="muted-text">
-          {{
-            isWeChatAuth
-              ? "退出将撤销当前登录会话，微信绑定关系仍保留；再次绑定原账号即可登录。"
-              : "退出后可重新绑定账号，本地演示的权益和订单将保留。"
-          }}
-        </text>
+        <text class="muted-text">退出将撤销当前登录会话，微信绑定关系仍保留；再次绑定原账号即可登录。</text>
         <template #actions>
           <view class="dialog-button-stack">
             <button class="danger-button" :disabled="loggingOut" @tap="logout">确认退出</button>
@@ -76,15 +63,14 @@ import OrderList from "../../components/OrderList.vue";
 import OrderDetailDialog from "../../components/OrderDetailDialog.vue";
 import { useStudio } from "@/composables/useStudio";
 import { openBind, openDocument } from "@/utils/navigation";
-import { studioService } from "@/services/studioService";
+import { miniAuthClient } from "@/services/auth/miniAuthClient";
 import { errorMessage } from "@/utils/format";
 import AuthStatusNotice from "@/components/layout/AuthStatusNotice.vue";
-import { isWeChatAuth } from "@/config/api";
-import type { Order } from "@/types/studio";
+import type { BillingOrder } from "@/types/billing";
 
 const { dashboard, account, refresh } = useStudio();
 const refreshing = ref(false);
-const selectedOrder = ref<Order | null>(null);
+const selectedOrder = ref<BillingOrder | null>(null);
 const logoutOpen = ref(false);
 const loggingOut = ref(false);
 
@@ -104,12 +90,12 @@ onShow(() => {
 const openNovels = () => (account.value ? uni.navigateTo({ url: "/packages/account/pages/novels/index" }) : openBind());
 const openOrders = () => (account.value ? uni.navigateTo({ url: "/packages/account/pages/orders/index" }) : openBind());
 const copyWebsite = () => uni.showToast({ title: "电脑端网址将在正式上线后提供", icon: "none" });
-const showVersion = () => uni.showToast({ title: "星河创作 v0.1.0 · 本地演示版", icon: "none" });
+const showVersion = () => uni.showToast({ title: "星河创作 v0.1.0", icon: "none" });
 const logout = async () => {
   if (loggingOut.value) return;
   loggingOut.value = true;
   try {
-    await studioService.logout();
+    await miniAuthClient.logout();
     await refresh();
     logoutOpen.value = false;
     uni.showToast({ title: "已退出登录", icon: "none" });

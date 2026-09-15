@@ -2,25 +2,35 @@
   <AppPage>
     <template #mainContent>
       <view class="page-stack">
-        <PageHeading title="套餐" description="选择适合你的创作额度。当前为演示套餐，模拟开通不扣款。" />
+        <PageHeading title="套餐" description="选择适合你的创作额度，权益与网页端通用。" />
         <view v-if="loadError" class="empty-state">
           <text>{{ loadError }}</text>
-          <button class="text-button" @tap="loadProducts">重新加载</button>
+          <view class="error-actions">
+            <button class="secondary-button" @tap="loadAll">重新加载</button>
+            <button v-if="!isBound" class="primary-button" @tap="openBind()">绑定账号</button>
+          </view>
         </view>
-        <PlanCard v-for="plan in planList" :key="plan.id" :plan="plan" @select="select" />
-        <SectionHeading eyebrow="按需补量" title="创作加油包" />
-        <PackGrid :packs="packList" @select="select" />
-        <view class="notice-box">
-          <AppIcon name="info" tone="muted" :size="16" />
-          <text>开通前需绑定星河创作账号，权益可在网页端与小程序通用。当前可体验模拟开通，不会产生真实扣款。</text>
-        </view>
+        <template v-else>
+          <PlanCard v-for="plan in products" :key="plan.id" :plan="plan" @select="select" />
+          <SectionHeading eyebrow="按需补量" title="创作积分充值" />
+          <RechargeCard
+            v-if="recharge"
+            :credits-per-yuan="recharge.creditsPerYuan"
+            :minimum-recharge-fen="recharge.minimumRechargeFen"
+            @select="selectRecharge"
+          />
+          <view class="notice-box">
+            <AppIcon name="info" tone="muted" :size="16" />
+            <text>开通前需绑定星河创作账号。支付能力内测期间暂未开放，内测额度限时免费。</text>
+          </view>
+        </template>
         <LegalFooter />
       </view>
     </template>
     <template #tabBar><BottomNav current="plans" /></template>
     <template #dialogContainer>
       <CheckoutDialog
-        :product="selected"
+        :selection="selected"
         :busy="busy"
         :error="error"
         @close="close"
@@ -32,8 +42,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
 import { onLoad } from "@dcloudio/uni-app";
+import { ref } from "vue";
 import AppPage from "@/layout/components/pageContainer.vue";
 import BottomNav from "@/components/layout/BottomNav.vue";
 import LegalFooter from "@/components/layout/LegalFooter.vue";
@@ -41,32 +51,59 @@ import PageHeading from "@/components/ui/PageHeading.vue";
 import SectionHeading from "@/components/ui/SectionHeading.vue";
 import AppIcon from "@/components/ui/AppIcon.vue";
 import PlanCard from "../../components/PlanCard.vue";
-import PackGrid from "../../components/PackGrid.vue";
+import RechargeCard from "../../components/RechargeCard.vue";
 import CheckoutDialog from "../../components/CheckoutDialog.vue";
 import { useCheckout } from "../../composables/useCheckout";
-import { studioService } from "@/services/studioService";
+import { billingApi } from "@/api/billing";
+import { miniAuthClient } from "@/services/auth/miniAuthClient";
+import { useStudio } from "@/composables/useStudio";
+import { openBind } from "@/utils/navigation";
 import { errorMessage } from "@/utils/format";
-import type { Pack, Plan, Product } from "@/types/studio";
+import { ProductStatus } from "@/types/billing";
+import type { CreditSummary, WritingPlanProduct } from "@/types/billing";
 
-const products = ref<Product[]>([]);
+const products = ref<WritingPlanProduct[]>([]);
+const recharge = ref<Pick<CreditSummary, "creditsPerYuan" | "minimumRechargeFen"> | null>(null);
 const loadError = ref("");
-const planList = computed(() => products.value.filter((item): item is Plan => item.kind === "plan"));
-const packList = computed(() => products.value.filter((item): item is Pack => item.kind === "pack"));
+const { isBound } = useStudio();
 
-const { selected, busy, error, select, close, confirm } = useCheckout();
+const { selected, busy, error, select, selectRecharge, close, confirm } = useCheckout();
 
-const loadProducts = async () => {
+const loadAll = async () => {
+  loadError.value = "";
   try {
-    products.value = await studioService.getProducts();
-    loadError.value = "";
+    // 套餐与充值规则均需登录；未绑定时先给出绑定引导。
+    const user = await miniAuthClient.restore();
+    if (!user) throw new Error("请先绑定星河创作账号");
+    const [list, summary] = await Promise.all([billingApi.queryProducts(), billingApi.queryCreditSummary()]);
+    products.value = list
+      .filter((product) => product.status === ProductStatus.Enabled)
+      .sort((left, right) => left.displayOrder - right.displayOrder);
+    recharge.value = { creditsPerYuan: summary.creditsPerYuan, minimumRechargeFen: summary.minimumRechargeFen };
   } catch (reason) {
     loadError.value = errorMessage(reason);
+    products.value = [];
+    recharge.value = null;
   }
 };
 
 onLoad(async (options) => {
-  await loadProducts();
-  const product = products.value.find((item) => item.id === options?.product);
+  await loadAll();
+  const productId = typeof options?.product === "string" ? options.product : "";
+  const product = products.value.find((item) => item.id === productId);
   if (product) await select(product);
 });
 </script>
+
+<style lang="scss" scoped>
+.error-actions {
+  display: flex;
+  gap: 16rpx;
+  justify-content: center;
+
+  button {
+    min-width: 200rpx;
+    margin: 0;
+  }
+}
+</style>

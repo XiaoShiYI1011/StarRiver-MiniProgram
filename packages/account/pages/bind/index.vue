@@ -8,9 +8,7 @@
             <text class="identity-avatar">微</text>
             <view>
               <text class="identity-title">微信用户</text>
-              <text class="identity-note">
-                {{ isWeChatAuth ? "绑定后可在本机快捷登录" : "H5 原型预览 · 无需真实微信授权" }}
-              </text>
+              <text class="identity-note">绑定后可在本机快捷登录</text>
             </view>
           </view>
         </view>
@@ -27,7 +25,6 @@ import AppPage from "@/layout/components/pageContainer.vue";
 import PageHeading from "@/components/ui/PageHeading.vue";
 import BindingForm from "../../components/BindingForm.vue";
 import { goHome, mainRoutes } from "@/utils/navigation";
-import { isWeChatAuth } from "@/config/api";
 
 const productId = ref("");
 

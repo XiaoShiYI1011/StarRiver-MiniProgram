@@ -39,15 +39,8 @@
               </button>
             </view>
           </view>
-          <text v-if="codeSent && mode === 'code'" class="demo-hint">
-            {{
-              isWeChatAuth
-                ? "若邮箱对应已激活账号，验证码将发送至该邮箱，5 分钟内有效。"
-                : "演示验证码：123456（5 分钟内有效，不发送邮件）"
-            }}
-          </text>
-          <text v-if="mode === 'password' && !isWeChatAuth" class="demo-hint">
-            演示密码：demo123456，请勿填写真实密码。
+          <text v-if="codeSent && mode === 'code'" class="code-hint">
+            若邮箱对应已激活账号，验证码将发送至该邮箱，5 分钟内有效。
           </text>
           <checkbox-group @change="agreed = $event.detail.value.includes('agree')">
             <label class="agreement">
@@ -65,13 +58,7 @@
                 与
                 <text class="agreement-link" @tap.stop="openDocument('privacy')">《隐私政策》</text>
                 ，确认对所创作内容拥有合法权利。
-                <text class="agreement-note">
-                  {{
-                    isWeChatAuth
-                      ? "绑定会验证微信身份及邮箱凭证；创作权益与订单仍为演示数据。"
-                      : "当前为本地演示流程，协议内容为展示占位。"
-                  }}
-                </text>
+                <text class="agreement-note">绑定会验证微信身份及邮箱凭证，权益与订单以后端数据为准。</text>
               </view>
             </label>
           </checkbox-group>
@@ -87,13 +74,7 @@
       <button class="text-button binding-switch" :disabled="busy" @tap="toggleMode">
         {{ mode === "code" ? "使用邮箱密码登录并绑定" : "使用邮箱验证码登录并绑定" }}
       </button>
-      <text class="binding-note">
-        {{
-          isWeChatAuth
-            ? "请使用已激活的星河创作账号。没有账号请先在电脑端注册，或联系管理员。"
-            : "还没有账号？验证通过后将自动以该邮箱创建演示账号。"
-        }}
-      </text>
+      <text class="binding-note">请使用已激活的星河创作账号。没有账号请先在电脑端注册，或联系管理员。</text>
     </view>
   </view>
 </template>
@@ -101,7 +82,6 @@
 <script setup lang="ts">
 import { useBinding } from "../composables/useBinding";
 import { openDocument } from "@/utils/navigation";
-import { isWeChatAuth } from "@/config/api";
 
 const emit = defineEmits<{ success: [] }>();
 const {
@@ -188,7 +168,7 @@ const {
     color: var(--ink-faint);
   }
 
-  .demo-hint {
+  .code-hint {
     font-size: 24rpx;
     color: var(--accent);
   }

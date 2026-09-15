@@ -12,7 +12,7 @@
 
 <script setup lang="ts">
 import AppIcon from "@/components/ui/AppIcon.vue";
-import { capabilities } from "@/mocks/home";
+import { capabilities } from "@/content/home";
 </script>
 
 <style lang="scss" scoped>

@@ -15,13 +15,13 @@
     <view class="quota-meter" :aria-label="`七天额度剩余 ${account.weeklyRemainingPercent}%`">
       <view class="quota-meter__fill" :style="{ width: `${account.weeklyRemainingPercent}%` }" />
     </view>
-    <text class="quota-note">额度每 8 小时 / 7 天滚动恢复，加油包额度独立计算。</text>
-    <text v-if="account.packWords" class="pack-balance">加油包剩余 {{ formatNumber(account.packWords) }} 字</text>
+    <text class="quota-note">套餐额度每 8 小时 / 7 天滚动恢复，充值积分独立扣减。</text>
+    <text v-if="account.packCredits" class="pack-balance">充值积分剩余 {{ formatNumber(account.packCredits) }}</text>
   </view>
 </template>
 <script setup lang="ts">
-import type { Account } from "@/types/studio";
 import { formatNumber } from "@/utils/format";
+import type { Account } from "@/composables/useStudio";
 
 defineProps<{ account: Account }>();
 </script>

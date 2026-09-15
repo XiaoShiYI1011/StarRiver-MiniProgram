@@ -15,7 +15,7 @@
     </template>
     <template #mainContent>
       <view class="page-stack">
-        <PageHeading title="订单记录" description="这里保留本地模拟开通的记录，可继续支付或取消待支付订单。" />
+        <PageHeading title="订单记录" description="查询你创建的订单与支付状态。" />
         <OrderList :orders="filteredOrders" @select="selected = $event" />
         <LegalFooter />
       </view>
@@ -34,7 +34,8 @@ import OrderList from "../../components/OrderList.vue";
 import OrderDetailDialog from "../../components/OrderDetailDialog.vue";
 import { useStudio } from "@/composables/useStudio";
 import { goHome } from "@/utils/navigation";
-import type { Order, OrderStatus } from "@/types/studio";
+import { BillingOrderStatus } from "@/types/billing";
+import type { BillingOrder } from "@/types/billing";
 
 const { dashboard, refresh } = useStudio();
 
@@ -42,13 +43,14 @@ onShow(() => {
   void refresh();
 });
 
-const filter = ref<OrderStatus | "all">("all");
-const selected = ref<Order | null>(null);
-const filters: { id: OrderStatus | "all"; label: string }[] = [
+type FilterId = BillingOrderStatus | "all";
+const filter = ref<FilterId>("all");
+const selected = ref<BillingOrder | null>(null);
+const filters: { id: FilterId; label: string }[] = [
   { id: "all", label: "全部" },
-  { id: "pending", label: "待支付" },
-  { id: "completed", label: "已完成" },
-  { id: "closed", label: "已关闭" },
+  { id: BillingOrderStatus.Pending, label: "待支付" },
+  { id: BillingOrderStatus.Paid, label: "已完成" },
+  { id: BillingOrderStatus.Cancelled, label: "已关闭" },
 ];
 
 const filteredOrders = computed(() =>

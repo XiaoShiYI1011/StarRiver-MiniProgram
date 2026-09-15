@@ -2,7 +2,7 @@
 
 `components/pageContainer.vue` 参考 Web 页面容器的具名插槽，使用 UniApp 原生组件实现。配色、品牌栏和底部浮层外观来自 `PrototypeDesign`。
 
-请显式以 `AppPage` 导入，**不要使用 `<page-container>` 标签**，避免与微信原生同名组件冲突。首页、商城和账号分包均已接入；业务使用本地模拟服务，分包结构和演示方式见 [项目说明](../README.md)。
+请显式以 `AppPage` 导入，**不要使用 `<page-container>` 标签**，避免与微信原生同名组件冲突。首页、商城和账号分包均已接入真实后端数据；分包结构见 [项目说明](../README.md)。
 
 ## 页面配置
 

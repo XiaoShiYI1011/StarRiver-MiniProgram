@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { steps } from "@/mocks/home";
+import { steps } from "@/content/home";
 </script>
 
 <style lang="scss" scoped>

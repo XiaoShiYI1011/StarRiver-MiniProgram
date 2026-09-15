@@ -2,22 +2,23 @@
   <view class="novel-card">
     <image v-if="novel.cover" class="novel-cover" :src="novel.cover" mode="aspectFill" />
     <view v-else class="novel-cover novel-cover--text">
-      雨落
-      <text>长街</text>
+      {{ novel.title.slice(0, 2) }}
+      <text>{{ novel.title.slice(2, 4) }}</text>
     </view>
     <view class="novel-info">
       <text class="novel-title">{{ novel.title }}</text>
-      <text class="novel-genre">{{ novel.genre }}</text>
-      <text class="novel-stats">{{ novel.chapters }} 章 · {{ novel.words }}字</text>
-      <text class="novel-date">最近更新 {{ novel.updatedAt }}</text>
+      <text v-if="novel.genre" class="novel-genre">{{ novel.genre }}</text>
+      <text class="novel-stats">{{ novel.chapterCount }} 章 · {{ formatWordCount(novel.wordCount) }}字</text>
+      <text class="novel-date">最近更新 {{ formatDate(novel.updatedAt) }}</text>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import type { Novel } from "@/types/studio";
+import { formatDate, formatWordCount } from "@/utils/format";
+import type { NovelInfo } from "@/types/novel";
 
-defineProps<{ novel: Novel }>();
+defineProps<{ novel: NovelInfo }>();
 </script>
 
 <style lang="scss" scoped>

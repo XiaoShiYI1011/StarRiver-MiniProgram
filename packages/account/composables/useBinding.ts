@@ -1,5 +1,5 @@
 import { computed, onUnmounted, ref } from "vue";
-import { studioService } from "@/services/studioService";
+import { miniAuthClient } from "@/services/auth/miniAuthClient";
 import { refreshDashboard } from "@/composables/useStudio";
 import { errorMessage, isEmail } from "@/utils/format";
 
@@ -29,7 +29,7 @@ export const useBinding = (onSuccess: () => void) => {
     }
     sending.value = true;
     try {
-      const response = await studioService.requestCode(email.value);
+      const response = await miniAuthClient.requestCode(email.value);
       const deadline = Date.now() + response.retryAfter * 1000;
       remaining.value = response.retryAfter;
       codeSent.value = true;
@@ -54,7 +54,7 @@ export const useBinding = (onSuccess: () => void) => {
     error.value = "";
     busy.value = true;
     try {
-      await studioService.bind({
+      await miniAuthClient.bind({
         email: email.value,
         credential: credential.value,
         mode: mode.value,

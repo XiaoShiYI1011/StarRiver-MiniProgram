@@ -3,18 +3,24 @@
     <text v-if="!orders.length" class="empty-state order-empty">暂无订单记录</text>
     <button v-for="order in orders" :key="order.id" class="order-row" @tap="emit('select', order)">
       <view class="order-icon">
-        <AppIcon :name="order.status === 'pending' ? 'clock' : order.kind === 'plan' ? 'diamond' : 'bag'" :size="18" />
+        <AppIcon
+          :name="
+            order.status === BillingOrderStatus.Pending
+              ? 'clock'
+              : order.orderType === BillingOrderType.WritingPlan
+                ? 'diamond'
+                : 'bag'
+          "
+          :size="18"
+        />
       </view>
       <view class="order-content">
-        <text class="order-name">{{ order.name }}</text>
-        <text class="order-date">
-          {{ order.createdAt }} ·
-          {{ order.status === "pending" ? "等待模拟支付" : `订单号 ${order.id.slice(0, 4)}…${order.id.slice(-4)}` }}
-        </text>
+        <text class="order-name">{{ order.productName }}</text>
+        <text class="order-date">{{ formatDate(order.createdAt) }} · 订单号 {{ order.orderNo }}</text>
       </view>
       <view class="order-end">
-        <text class="status-tag" :class="`status-tag--${order.status}`">{{ statusLabels[order.status] }}</text>
-        <text class="order-amount">¥{{ order.price }}</text>
+        <text class="status-tag" :class="statusClass[order.status]">{{ statusLabels[order.status] }}</text>
+        <text class="order-amount">¥{{ formatYuan(order.amountFen) }}</text>
       </view>
     </button>
   </view>
@@ -22,11 +28,24 @@
 
 <script setup lang="ts">
 import AppIcon from "@/components/ui/AppIcon.vue";
-import type { Order, OrderStatus } from "@/types/studio";
+import { formatDate, formatYuan } from "@/utils/format";
+import { BillingOrderStatus, BillingOrderType } from "@/types/billing";
+import type { BillingOrder } from "@/types/billing";
 
-defineProps<{ orders: Order[] }>();
-const emit = defineEmits<{ select: [order: Order] }>();
-const statusLabels: Record<OrderStatus, string> = { completed: "已完成", pending: "待支付", closed: "已关闭" };
+defineProps<{ orders: BillingOrder[] }>();
+const emit = defineEmits<{ select: [order: BillingOrder] }>();
+const statusLabels: Record<BillingOrderStatus, string> = {
+  [BillingOrderStatus.Pending]: "待支付",
+  [BillingOrderStatus.Paid]: "已完成",
+  [BillingOrderStatus.Cancelled]: "已关闭",
+  [BillingOrderStatus.Refunded]: "已退款",
+};
+const statusClass: Record<BillingOrderStatus, string> = {
+  [BillingOrderStatus.Pending]: "status-tag--pending",
+  [BillingOrderStatus.Paid]: "",
+  [BillingOrderStatus.Cancelled]: "status-tag--closed",
+  [BillingOrderStatus.Refunded]: "status-tag--closed",
+};
 </script>
 
 <style lang="scss" scoped>
@@ -80,8 +99,11 @@ const statusLabels: Record<OrderStatus, string> = { completed: "已完成", pend
   .order-date {
     display: block;
     margin-top: 4rpx;
-    font-size: 24rpx;
+    overflow: hidden;
+    font-size: 22rpx;
     color: var(--ink-faint);
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .order-end {

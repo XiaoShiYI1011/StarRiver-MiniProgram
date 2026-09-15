@@ -12,7 +12,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { faqs } from "@/mocks/home";
+import { faqs } from "@/content/home";
 
 const opened = ref(-1);
 </script>
