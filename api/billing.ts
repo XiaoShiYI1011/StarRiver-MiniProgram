@@ -1,6 +1,6 @@
 import { request } from "@/utils/request";
 import type { PageResult } from "@/types/api";
-import type { BillingOrder, BillingOrderStatus, CreditSummary, WritingPlanProduct } from "@/types/billing";
+import type { BillingOrder, BillingOrderStatus, CreditSummary, VirtualPaymentPayData, WritingPlanProduct } from "@/types/billing";
 
 const planPrefix = "/api/assistant/v1/Plan";
 const creditPrefix = "/api/assistant/v1/Credit";
@@ -18,6 +18,7 @@ export const billingApi = {
     request<BillingOrder>({ url: `${orderPrefix}/CreatePlanOrder`, method: "POST", data: input }),
   createCreditOrder: (input: { amountFen: number; idempotencyKey: string }) =>
     request<BillingOrder>({ url: `${orderPrefix}/CreateCreditOrder`, method: "POST", data: input }),
-  completeSimulatedPayment: (input: { orderId: string; idempotencyKey: string }) =>
-    request<BillingOrder>({ url: `${orderPrefix}/CompleteSimulatedPayment`, method: "POST", data: input }),
+  createVirtualPayment: (input: { orderId: string }) =>
+    request<VirtualPaymentPayData>({ url: `${orderPrefix}/CreateVirtualPayment`, method: "POST", data: input }),
+  queryOrder: (orderId: string) => request<BillingOrder>({ url: `${orderPrefix}/QueryOrder`, method: "GET", params: { orderId } }),
 };

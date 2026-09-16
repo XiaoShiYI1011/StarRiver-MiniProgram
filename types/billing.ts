@@ -19,6 +19,8 @@ export interface WritingPlanProduct {
   isRecommended: boolean;
   includesDraftPlan: boolean;
   includesRemediationStrategy: boolean;
+  /** 微信虚拟支付道具 ID；未配置的套餐不可在小程序购买 */
+  virtualProductId?: string | null;
   editVersion: number;
 }
 
@@ -67,4 +69,15 @@ export interface BillingOrder {
   status: BillingOrderStatus;
   paidAtUtc: string | null;
   createdAt: string;
+}
+
+/** 后端生成的 wx.requestVirtualPayment 调起参数；signData 必须原样传给微信，不得改动。 */
+export interface VirtualPaymentPayData {
+  orderId: string;
+  orderNo: string;
+  status: BillingOrderStatus;
+  signData: string;
+  signature: string;
+  mode: string;
+  paySig: string;
 }

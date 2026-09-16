@@ -30,8 +30,9 @@
 import { ref, watch } from "vue";
 import AppDialog from "@/components/ui/AppDialog.vue";
 import { refreshDashboard } from "@/composables/useStudio";
-import { billingApi, newIdempotencyKey } from "@/api/billing";
+import { billingApi } from "@/api/billing";
 import { errorMessage, formatDate, formatNumber, formatYuan } from "@/utils/format";
+import { pollOrderPaid, requestVirtualPayment, VirtualPaymentCancelledError } from "@/services/virtualPayment";
 import { BillingOrderStatus } from "@/packages/account/types/billing";
 import type { BillingOrder } from "@/types/billing";
 
@@ -59,10 +60,20 @@ const pay = async () => {
   busy.value = true;
   error.value = "";
   try {
-    await billingApi.completeSimulatedPayment({ orderId: props.order.id, idempotencyKey: newIdempotencyKey() });
+    // 同一订单重复发起支付返回同一商户单号，取消后可原单继续支付。
+    const payData = await billingApi.createVirtualPayment({ orderId: props.order.id });
+    let cancelled = false;
+    try {
+      await requestVirtualPayment(payData);
+    } catch (reason) {
+      if (reason instanceof VirtualPaymentCancelledError) cancelled = true;
+      else throw reason;
+    }
+    // 微信 success 回调不作为到账依据，权益以服务端发货（推送 + 兜底查单）为准。
+    const paid = cancelled ? false : await pollOrderPaid(props.order.id);
     await refreshDashboard();
     emit("close");
-    uni.showToast({ title: "支付成功", icon: "none" });
+    uni.showToast({ title: cancelled ? "已取消支付，可稍后继续支付" : paid ? "支付成功" : "支付结果确认中，到账后可在订单记录查看", icon: "none" });
   } catch (reason) {
     error.value = errorMessage(reason);
   } finally {

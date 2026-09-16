@@ -3,6 +3,7 @@ import { useStudio } from "@/composables/useStudio";
 import { billingApi, newIdempotencyKey } from "@/api/billing";
 import { openBind } from "@/utils/navigation";
 import { errorMessage } from "@/utils/format";
+import { pollOrderPaid, requestVirtualPayment, VirtualPaymentCancelledError } from "@/services/virtualPayment";
 import type { WritingPlanProduct } from "@/types/billing";
 
 export type CheckoutSelection =
@@ -56,10 +57,27 @@ export const useCheckout = () => {
               });
         orderId = order.id;
       }
-      if (pay) await billingApi.completeSimulatedPayment({ orderId, idempotencyKey: newIdempotencyKey() });
+      if (!pay) {
+        await refresh();
+        selected.value = null;
+        uni.showToast({ title: "订单已创建，可在订单记录中查看", icon: "none" });
+        return;
+      }
+      // 同一订单重复发起支付返回同一商户单号，取消后可原单继续支付。
+      const payData = await billingApi.createVirtualPayment({ orderId });
+      let cancelled = false;
+      try {
+        await requestVirtualPayment(payData);
+      } catch (reason) {
+        if (reason instanceof VirtualPaymentCancelledError) cancelled = true;
+        else throw reason;
+      }
+      // 微信 success 回调不作为到账依据，权益以服务端发货（推送 + 兜底查单）为准。
+      const paid = cancelled ? false : await pollOrderPaid(orderId);
       await refresh();
       selected.value = null;
-      uni.showToast({ title: pay ? "支付成功" : "订单已创建，可在订单记录中查看", icon: "none" });
+      if (cancelled) uni.showToast({ title: "已取消支付，可稍后继续支付", icon: "none" });
+      else uni.showToast({ title: paid ? "支付成功" : "支付结果确认中，到账后可在订单记录查看", icon: "none" });
     } catch (reason) {
       error.value = errorMessage(reason);
     } finally {

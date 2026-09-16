@@ -10,7 +10,7 @@
       <text class="recharge-credits">≈ {{ formatNumber(credits) }} 积分</text>
     </view>
     <text class="recharge-note">
-      最低 {{ formatYuan(minimumRechargeFen) }} 元；充值积分独立于套餐额度扣减，用于章节生成等 AI 消耗。
+      最低 {{ formatYuan(minimumRechargeFen) }} 元，需为整数元；充值积分独立于套餐额度扣减，用于章节生成等 AI 消耗。
     </text>
     <button class="primary-button" :disabled="!valid" @tap="emit('select', amountFen, credits)">立即充值</button>
   </view>
@@ -23,16 +23,17 @@ import { formatNumber, formatYuan } from "@/utils/format";
 const props = defineProps<{ creditsPerYuan: number; minimumRechargeFen: number }>();
 const emit = defineEmits<{ select: [amountFen: number, credits: number] }>();
 
-const amountText = ref(String(props.minimumRechargeFen / 100));
+// 虚拟支付按 1 元单价道具整元下单，金额必须为 100 分的整数倍。
+const amountText = ref(String(Math.max(1, Math.ceil(props.minimumRechargeFen / 100))));
 watch(
   () => props.minimumRechargeFen,
   (fen) => {
-    amountText.value = String(fen / 100);
+    amountText.value = String(Math.max(1, Math.ceil(fen / 100)));
   }
 );
 const amountFen = computed(() => Math.round((Number.parseFloat(amountText.value) || 0) * 100));
 const credits = computed(() => Math.floor((amountFen.value / 100) * props.creditsPerYuan));
-const valid = computed(() => amountFen.value >= props.minimumRechargeFen);
+const valid = computed(() => amountFen.value >= props.minimumRechargeFen && amountFen.value % 100 === 0);
 </script>
 
 <style lang="scss" scoped>

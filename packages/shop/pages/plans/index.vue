@@ -21,7 +21,7 @@
           />
           <view class="notice-box">
             <AppIcon name="info" tone="muted" :size="16" />
-            <text>开通前需绑定星河创作账号。支付能力内测期间暂未开放，内测额度限时免费。</text>
+            <text>开通前需绑定星河创作账号，支付通过微信小程序虚拟支付完成，权益到账后可在“我的 - 订单记录”查看。</text>
           </view>
         </template>
         <LegalFooter />
