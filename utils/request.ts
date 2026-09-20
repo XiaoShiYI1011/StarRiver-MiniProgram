@@ -1,3 +1,4 @@
+import { decodeProtectedText } from "@/utils/protectedText";
 import type { StoredSession } from "@/types/auth";
 import { API_BASE_URL } from "@/config/api";
 import { ApiError } from "@/types/api";
@@ -146,7 +147,11 @@ export const request = async <T>(config: RequestConfig): Promise<T> => {
           reject(error);
           return;
         }
-        resolve(body.data as T);
+        try {
+          resolve(decodeProtectedText(body.data) as T);
+        } catch (error) {
+          reject(error);
+        }
       },
       fail(error) {
         const normalized = toRequestError(error);
