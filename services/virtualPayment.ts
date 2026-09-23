@@ -1,5 +1,5 @@
 import { billingApi } from "@/api/billing";
-import { BillingOrderStatus } from "@/packages/account/types/billing";
+import { BillingOrderStatus } from "@/types/billing";
 import type { VirtualPaymentPayData } from "@/types/billing";
 
 /** 个人主体虚拟支付要求 iOS 微信不低于该版本（Android 无此限制）。 */

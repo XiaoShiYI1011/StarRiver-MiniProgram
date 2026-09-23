@@ -11,7 +11,7 @@
         </text>
       </template>
       <template v-else>
-        <text class="checkout-name">创作积分充值</text>
+        <text class="checkout-name">创作加油包</text>
         <text class="checkout-price">¥{{ formatYuan(selection.amountFen) }}</text>
         <text class="muted-text">预计到账 {{ formatNumber(selection.credits) }} 积分 · 独立于套餐额度扣减</text>
       </template>
