@@ -3,9 +3,9 @@
     <text v-if="plan.isRecommended" class="plan-badge">热门推荐</text>
     <view class="plan-summary">
       <image
-        v-if="productImages[plan.productCode]"
+        v-if="productImage"
         class="plan-image"
-        :src="productImages[plan.productCode]"
+        :src="productImage"
         mode="aspectFit"
       />
       <view class="plan-heading">
@@ -37,14 +37,12 @@
 <script setup lang="ts">
 import AppIcon from "@/components/ui/AppIcon.vue";
 import { formatNumber, formatYuan } from "@/utils/format";
+import { API_BASE_URL } from "@/config/api";
 import type { WritingPlanProduct } from "@/types/billing";
+import { computed } from "vue";
 
-defineProps<{ plan: WritingPlanProduct; active: boolean; betaFreeMode: boolean }>();
-const productImages: Record<string, string> = {
-  "writing-light": "/static/products/writingplan-light.png",
-  "writing-standard": "/static/products/writingplan-standard.png",
-  "writing-pro": "/static/products/writingplan-high.png",
-};
+const props = defineProps<{ plan: WritingPlanProduct; active: boolean; betaFreeMode: boolean }>();
+const productImage = computed(() => props.plan.imageUrl ? `${API_BASE_URL}${props.plan.imageUrl}` : null);
 const emit = defineEmits<{ activate: [id: string]; select: [plan: WritingPlanProduct] }>();
 </script>
 

@@ -35,6 +35,7 @@ export interface WritingPlanProduct {
   includesRemediationStrategy: boolean;
   /** 微信虚拟支付道具 ID；未配置的套餐不可在小程序购买 */
   virtualProductId?: string | null;
+  imageUrl?: string | null;
   editVersion: number;
 }
 
