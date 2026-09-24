@@ -39,12 +39,14 @@ const statusLabels: Record<BillingOrderStatus, string> = {
   [BillingOrderStatus.Paid]: "已完成",
   [BillingOrderStatus.Cancelled]: "已关闭",
   [BillingOrderStatus.Refunded]: "已退款",
+  [BillingOrderStatus.AdministratorAdjusted]: "管理员调整",
 };
 const statusClass: Record<BillingOrderStatus, string> = {
   [BillingOrderStatus.Pending]: "status-tag--pending",
   [BillingOrderStatus.Paid]: "",
   [BillingOrderStatus.Cancelled]: "status-tag--closed",
   [BillingOrderStatus.Refunded]: "status-tag--closed",
+  [BillingOrderStatus.AdministratorAdjusted]: "",
 };
 </script>
 

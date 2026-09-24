@@ -45,6 +45,7 @@ const labels: Record<BillingOrderStatus, string> = {
   [BillingOrderStatus.Paid]: "已完成",
   [BillingOrderStatus.Cancelled]: "已关闭",
   [BillingOrderStatus.Refunded]: "已退款",
+  [BillingOrderStatus.AdministratorAdjusted]: "管理员调整",
 };
 watch(
   () => props.order?.id,
@@ -73,7 +74,10 @@ const pay = async () => {
     const paid = cancelled ? false : await pollOrderPaid(props.order.id);
     await refreshDashboard();
     emit("close");
-    uni.showToast({ title: cancelled ? "已取消支付，可稍后继续支付" : paid ? "支付成功" : "支付结果确认中，到账后可在订单记录查看", icon: "none" });
+    uni.showToast({
+      title: cancelled ? "已取消支付，可稍后继续支付" : paid ? "支付成功" : "支付结果确认中，到账后可在订单记录查看",
+      icon: "none",
+    });
   } catch (reason) {
     error.value = errorMessage(reason);
   } finally {

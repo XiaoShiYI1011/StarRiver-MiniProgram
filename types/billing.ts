@@ -4,6 +4,8 @@
 export enum BillingOrderType {
   WritingPlan = 1,
   CreditRecharge = 2,
+  AdministratorPlanAdjustment = 3,
+  AdministratorCreditAdjustment = 4,
 }
 
 export enum BillingOrderStatus {
@@ -11,6 +13,7 @@ export enum BillingOrderStatus {
   Paid = 2,
   Cancelled = 3,
   Refunded = 4,
+  AdministratorAdjusted = 5,
 }
 
 import type { ProductStatus } from "@/packages/shop/types/billing";
