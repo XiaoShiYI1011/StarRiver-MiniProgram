@@ -23,6 +23,10 @@ export const useBinding = (onSuccess: () => void) => {
   const requestCode = async () => {
     if (!canSend.value) return;
     error.value = "";
+    if (!agreed.value) {
+      error.value = "请先阅读并勾选用户协议与隐私政策，再获取验证码";
+      return;
+    }
     if (!isEmail(email.value.trim())) {
       error.value = "请输入有效的邮箱地址";
       return;

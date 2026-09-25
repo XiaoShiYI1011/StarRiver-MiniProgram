@@ -10,8 +10,7 @@
       <text class="recharge-credits">≈ {{ formatNumber(credits) }} 积分</text>
     </view>
     <text class="recharge-note">
-      1 元 = 100 代币，购买后到账 {{ formatNumber(creditsPerYuan) }} 创作积分。
-      最低 {{ formatYuan(minimumRechargeFen) }} 元，需为整数元；充值积分独立于套餐额度扣减，用于章节生成等 AI 消耗。
+      购买后到账 {{ formatNumber(credits) }} 创作积分，最低 {{ formatYuan(minimumRechargeFen) }} 元，需为整数元；充值积分独立于套餐额度扣减，用于创作消耗。
     </text>
     <button class="primary-button" :disabled="!valid" @tap="emit('select', amountFen, credits)">立即充值</button>
   </view>

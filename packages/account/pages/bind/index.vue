@@ -13,11 +13,11 @@
           </view>
         </view>
         <BindingForm @success="finish" />
-        <text class="binding-footer">不会获取你的微信好友与朋友圈信息</text>
       </view>
     </template>
   </AppPage>
 </template>
+
 <script setup lang="ts">
 import { ref } from "vue";
 import { onLoad } from "@dcloudio/uni-app";

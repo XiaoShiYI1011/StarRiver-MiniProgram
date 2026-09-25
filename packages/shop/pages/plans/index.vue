@@ -79,7 +79,8 @@ import type { CreditSummary, WritingPlanProduct } from "@/types/billing";
 const products = ref<WritingPlanProduct[]>([]);
 const activePlanId = ref("");
 const summary = ref<CreditSummary | null>(null);
-const betaFreeMode = computed(() => summary.value?.betaFreeMode ?? true);
+// 未登录/未加载时不假定内测模式，避免向未绑定用户展示内测文案；以内测接口返回为准。
+const betaFreeMode = computed(() => summary.value?.betaFreeMode === true);
 const { selected, busy, error, select, selectRecharge, close, confirm } = useCheckout();
 const selectPlan = (plan: WritingPlanProduct) => {
   activePlanId.value = plan.id;
@@ -121,6 +122,7 @@ onLoad(async (options) => {
   display: flex;
   gap: 16rpx;
   justify-content: center;
+  margin-top: 60rpx;
 
   button {
     min-width: 200rpx;

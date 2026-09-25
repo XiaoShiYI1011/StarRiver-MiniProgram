@@ -58,7 +58,6 @@
                 与
                 <text class="agreement-link" @tap.stop="openDocument('privacy')">《隐私政策》</text>
                 ，确认对所创作内容拥有合法权利。
-                <text class="agreement-note">绑定会验证微信身份及邮箱凭证，权益与订单以后端数据为准。</text>
               </view>
             </label>
           </checkbox-group>
