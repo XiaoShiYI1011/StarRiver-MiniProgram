@@ -6,13 +6,16 @@
     </view>
     <view class="recharge-row">
       <text class="recharge-unit">¥</text>
-      <input v-model="amountText" class="recharge-input" type="digit" placeholder="输入金额" />
+      <input v-model="amountText" class="recharge-input" type="digit" placeholder="输入金额" :disabled="disabled" />
       <text class="recharge-credits">≈ {{ formatNumber(credits) }} 积分</text>
     </view>
     <text class="recharge-note">
-      购买后到账 {{ formatNumber(credits) }} 创作积分，最低 {{ formatYuan(minimumRechargeFen) }} 元，需为整数元；充值积分独立于套餐额度扣减，用于创作消耗。
+      购买后到账 {{ formatNumber(credits) }} 创作积分，最低
+      {{ formatYuan(minimumRechargeFen) }} 元，需为整数元；充值积分独立于套餐额度扣减，用于创作消耗。
     </text>
-    <button class="primary-button" :disabled="!valid" @tap="emit('select', amountFen, credits)">立即充值</button>
+    <button class="primary-button" :disabled="disabled || !valid" @tap="emit('select', amountFen, credits)">
+      {{ disabled ? "内测期间暂不开放" : "立即充值" }}
+    </button>
   </view>
 </template>
 
@@ -20,7 +23,7 @@
 import { computed, ref, watch } from "vue";
 import { formatNumber, formatYuan } from "@/utils/format";
 
-const props = defineProps<{ creditsPerYuan: number; minimumRechargeFen: number }>();
+const props = defineProps<{ creditsPerYuan: number; minimumRechargeFen: number; disabled?: boolean }>();
 const emit = defineEmits<{ select: [amountFen: number, credits: number] }>();
 
 // 虚拟支付按 1 元 = 100 代币整元下单，金额必须为 100 分的整数倍。

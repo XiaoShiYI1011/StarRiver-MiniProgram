@@ -1,2 +1,16 @@
-/** 保持账户分包原有导入兼容，运行时枚举统一由主包提供。 */
-export { BillingOrderType, BillingOrderStatus } from "@/types/billing";
+/** 账户分包使用的订单枚举；数值与后端契约保持一致。 */
+export enum BillingOrderType {
+  WritingPlan = 1,
+  CreditRecharge = 2,
+  AdministratorPlanAdjustment = 3,
+  AdministratorCreditAdjustment = 4,
+}
+
+export enum BillingOrderStatus {
+  Pending = 1,
+  Paid = 2,
+  Cancelled = 3,
+  Refunded = 4,
+  AdministratorAdjusted = 5,
+  PaidNeedsReview = 6,
+}

@@ -1,11 +1,15 @@
 <template>
-  <AppPage :scroll-into-view="rechargeScrollTarget">
+  <AppPage>
     <template #mainContent>
       <view class="page-stack">
         <PageHeading
-          title="套餐权益预览"
+          :title="requestedRecharge ? '创作积分充值' : requestedProductId ? '确认订阅套餐' : '套餐与创作积分'"
           :description="
-            betaFreeMode ? '内测期间无需购买，可直接体验核心创作功能。' : '选择适合你的创作额度，权益与网页端通用。'
+            betaFreeMode
+              ? '内测期间无需购买，可直接体验核心创作功能。'
+              : requestedRecharge || requestedProductId
+                ? '请确认扫码选择的商品，权益与网页端通用。'
+                : '选择套餐或按需补充创作积分，权益与网页端通用。'
           "
         />
         <view v-if="loadError" class="empty-state">
@@ -16,8 +20,27 @@
           </view>
         </view>
         <template v-else>
+          <view v-if="!requestedProductId" id="recharge-entry">
+            <SectionHeading eyebrow="创作加油包" :title="betaFreeMode ? '内测期间暂不开放' : '按需补充创作积分'" />
+            <RechargeCard
+              v-if="summary"
+              :credits-per-yuan="summary.creditsPerYuan"
+              :minimum-recharge-fen="summary.minimumRechargeFen"
+              :disabled="betaFreeMode"
+              @select="selectRecharge"
+            />
+          </view>
+          <view v-if="betaFreeMode" class="notice-box">
+            <AppIcon name="info" tone="muted" :size="16" />
+            <text>当前处于内测阶段，套餐购买和充值暂未开放，可使用内测免费额度体验创作。</text>
+          </view>
+          <SectionHeading
+            v-if="!requestedRecharge"
+            eyebrow="WritingPlan"
+            :title="requestedProductId ? '所选套餐' : '订阅套餐'"
+          />
           <PlanCard
-            v-for="plan in products"
+            v-for="plan in visibleProducts"
             :key="plan.id"
             :plan="plan"
             :beta-free-mode="betaFreeMode"
@@ -25,19 +48,6 @@
             @select="selectPlan"
             @activate="activePlanId = $event"
           />
-          <view id="recharge-entry">
-            <SectionHeading eyebrow="创作加油包" :title="betaFreeMode ? '内测期间无需充值' : '按需补充创作积分'" />
-          </view>
-          <RechargeCard
-            v-if="!betaFreeMode && summary"
-            :credits-per-yuan="summary.creditsPerYuan"
-            :minimum-recharge-fen="summary.minimumRechargeFen"
-            @select="selectRecharge"
-          />
-          <view v-if="betaFreeMode" class="notice-box">
-            <AppIcon name="info" tone="muted" :size="16" />
-            <text>当前处于内测阶段，套餐购买和充值暂未开放，可使用内测免费额度体验创作。</text>
-          </view>
         </template>
         <LegalFooter />
       </view>
@@ -59,7 +69,7 @@
 
 <script setup lang="ts">
 import { onLoad } from "@dcloudio/uni-app";
-import { computed, nextTick, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import AppPage from "@/layout/components/pageContainer.vue";
 import BottomNav from "@/components/layout/BottomNav.vue";
 import LegalFooter from "@/components/layout/LegalFooter.vue";
@@ -80,8 +90,15 @@ import type { CreditSummary, WritingPlanProduct } from "@/types/billing";
 
 const products = ref<WritingPlanProduct[]>([]);
 const activePlanId = ref("");
-const rechargeScrollTarget = ref("");
-let requestedRecharge = false;
+const requestedRecharge = ref(false);
+const requestedProductId = ref("");
+const visibleProducts = computed(() =>
+  requestedRecharge.value
+    ? []
+    : requestedProductId.value
+      ? products.value.filter((product) => product.id === requestedProductId.value)
+      : products.value
+);
 const summary = ref<CreditSummary | null>(null);
 // 未登录/未加载时不假定内测模式，避免向未绑定用户展示内测文案；以内测接口返回为准。
 const betaFreeMode = computed(() => summary.value?.betaFreeMode === true);
@@ -92,12 +109,12 @@ const selectPlan = (plan: WritingPlanProduct) => {
 };
 const loadError = ref("");
 const { isBound } = useStudio();
-let requestedProductId = "";
 let resumeCheckout = false;
 
 const loadAll = async () => {
   loadError.value = "";
   try {
+    if (requestedProductId.value && requestedRecharge.value) throw new Error("商品参数无效，请从网页重新扫码");
     // 套餐与充值规则均需登录；未绑定时先给出绑定引导。
     const user = await miniAuthClient.restore();
     if (!user) throw new Error("请先绑定星河创作账号");
@@ -109,19 +126,14 @@ const loadAll = async () => {
     if (!products.value.some((plan) => plan.id === activePlanId.value)) {
       activePlanId.value = products.value.find((plan) => plan.isRecommended)?.id ?? products.value[0]?.id ?? "";
     }
-    if (requestedProductId) {
-      const product = products.value.find((item) => item.id === requestedProductId);
+    if (requestedProductId.value) {
+      const product = products.value.find((item) => item.id === requestedProductId.value);
       if (!product) throw new Error("所选商品不存在或已停售，请返回网页重新选择");
       activePlanId.value = product.id;
       if (resumeCheckout && !betaFreeMode.value) {
         await select(product);
         if (selected.value) resumeCheckout = false;
       }
-    }
-    if (requestedRecharge) {
-      await nextTick();
-      rechargeScrollTarget.value = "recharge-entry";
-      requestedRecharge = false;
     }
   } catch (reason) {
     loadError.value = errorMessage(reason);
@@ -134,8 +146,8 @@ watch(selected, (value, previous) => {
 });
 
 onLoad(async (options) => {
-  requestedProductId = typeof options?.product === "string" ? options.product : "";
-  requestedRecharge = options?.recharge === "1";
+  requestedProductId.value = typeof options?.product === "string" ? options.product : "";
+  requestedRecharge.value = options?.recharge === "1";
   resumeCheckout = options?.checkout === "1";
   await loadAll();
 });

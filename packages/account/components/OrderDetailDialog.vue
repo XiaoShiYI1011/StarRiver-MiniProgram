@@ -40,7 +40,11 @@ import AppDialog from "@/components/ui/AppDialog.vue";
 import { refreshDashboard } from "@/composables/useStudio";
 import { billingApi } from "@/api/billing";
 import { errorMessage, formatDate, formatNumber, formatYuan } from "@/utils/format";
-import { pollOrderPaid, requestVirtualPayment, VirtualPaymentCancelledError } from "@/services/virtualPayment";
+import {
+  pollOrderPaid,
+  requestVirtualPayment,
+  VirtualPaymentCancelledError,
+} from "@/packages/account/services/virtualPayment";
 import { BillingOrderStatus } from "@/packages/account/types/billing";
 import type { BillingOrder } from "@/types/billing";
 

@@ -1,21 +1,8 @@
 /** 与后端 BillingManager 的 VO 保持同构；金额一律为分。 */
 
-// 订单枚举由主包支付服务和账户分包共同使用，必须留在主包。
-export enum BillingOrderType {
-  WritingPlan = 1,
-  CreditRecharge = 2,
-  AdministratorPlanAdjustment = 3,
-  AdministratorCreditAdjustment = 4,
-}
-
-export enum BillingOrderStatus {
-  Pending = 1,
-  Paid = 2,
-  Cancelled = 3,
-  Refunded = 4,
-  AdministratorAdjusted = 5,
-  PaidNeedsReview = 6,
-}
+// 运行时枚举位于各自分包；这里仅描述后端响应的数值契约，不生成主包 JS。
+export type BillingOrderType = 1 | 2 | 3 | 4;
+export type BillingOrderStatus = 1 | 2 | 3 | 4 | 5 | 6;
 
 import type { ProductStatus } from "@/packages/shop/types/billing";
 export type { ProductStatus };

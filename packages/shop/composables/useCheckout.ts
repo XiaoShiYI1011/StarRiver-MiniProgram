@@ -3,8 +3,12 @@ import { useStudio } from "@/composables/useStudio";
 import { billingApi, newIdempotencyKey } from "@/api/billing";
 import { openBind } from "@/utils/navigation";
 import { errorMessage } from "@/utils/format";
-import { pollOrderPaid, requestVirtualPayment, VirtualPaymentCancelledError } from "@/services/virtualPayment";
-import { BillingOrderStatus } from "@/types/billing";
+import {
+  pollOrderPaid,
+  requestVirtualPayment,
+  VirtualPaymentCancelledError,
+} from "@/packages/shop/services/virtualPayment";
+import { BillingOrderStatus } from "@/packages/shop/types/billing";
 import type { WritingPlanProduct, PlanPurchaseQuote } from "@/types/billing";
 import { miniAuthClient } from "@/services/auth/miniAuthClient";
 

@@ -37,8 +37,8 @@ const fixture = (overrides = {}) => {
     "@/utils/navigation": { openBind() {} },
     "@/utils/format": { errorMessage: (error) => error.message },
     "@/services/auth/miniAuthClient": { miniAuthClient: { restore: async () => true } },
-    "@/types/billing": { BillingOrderStatus: { Paid: 2 } },
-    "@/services/virtualPayment": {
+    "@/packages/shop/types/billing": { BillingOrderStatus: { Paid: 2 } },
+    "@/packages/shop/services/virtualPayment": {
       requestVirtualPayment: async () => calls.push(["wx"]),
       pollOrderPaid: async () => true,
       VirtualPaymentCancelledError: class extends Error {},

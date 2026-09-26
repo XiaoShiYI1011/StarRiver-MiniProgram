@@ -1,5 +1,5 @@
 import { billingApi } from "@/api/billing";
-import { BillingOrderStatus } from "@/types/billing";
+import { BillingOrderStatus } from "@/packages/account/types/billing";
 import type { VirtualPaymentPayData } from "@/types/billing";
 
 /** 个人主体虚拟支付要求 iOS 微信不低于该版本（Android 无此限制）。 */
@@ -40,7 +40,7 @@ const ensurePlatformSupported = () => {
 /**
  * 调起微信小程序虚拟支付（道具直购）。
  * payData 由后端签名生成，signData / signature / paySig 必须原样透传。
- * 该模块被 shop 与 account 两个分包共用，放在主包以规避分包互引。
+ * 仅由账户分包调用，避免支付逻辑成为主包中的未使用文件。
  */
 export const requestVirtualPayment = (payData: VirtualPaymentPayData) =>
   new Promise<void>((resolve, reject) => {
@@ -58,7 +58,8 @@ export const requestVirtualPayment = (payData: VirtualPaymentPayData) =>
       paySig: payData.paySig,
       success: () => resolve(),
       fail: (result: WxRequestVirtualPaymentResult) => {
-        if (typeof result?.errMsg === "string" && result.errMsg.includes("cancel")) reject(new VirtualPaymentCancelledError());
+        if (typeof result?.errMsg === "string" && result.errMsg.includes("cancel"))
+          reject(new VirtualPaymentCancelledError());
         else reject(new Error(result?.errMsg || "虚拟支付调起失败，请稍后重试"));
       },
     });
