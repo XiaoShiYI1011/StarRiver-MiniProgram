@@ -11,9 +11,6 @@
         <text class="checkout-price">¥{{ formatYuan(selection.quote.amountFen) }}</text>
         <template v-if="selection.quote.action === 'upgrade'">
           <text class="muted-text">{{ selection.quote.currentProductName }} → {{ selection.quote.productName }}</text>
-          <text class="muted-text">剩余有效期差价向上取整到元，支付后立即升级。</text>
-          <text class="muted-text">到期时间不变：{{ formatDate(selection.quote.endsAtUtc) }}</text>
-          <text class="muted-text">已用与冻结额度保留，额度刷新时间不变。</text>
         </template>
         <text v-else class="muted-text">
           {{ selection.product.durationDays }} 天创作权益 ·

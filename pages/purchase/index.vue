@@ -8,9 +8,6 @@
         />
         <view v-if="preview" class="surface-card purchase-entry__summary">
           <text class="purchase-entry__name">{{ preview.productName }}</text>
-          <text v-if="preview.action === 'upgrade'" class="muted-text">
-            差价向上取整到元。升级立即生效，到期时间不变，已用与冻结额度保留。
-          </text>
           <text v-if="preview.action === 'recharge'" class="purchase-entry__price">
             最低充值 ¥{{ formatYuan(preview.priceFen) }}，进入充值页后选择金额
           </text>

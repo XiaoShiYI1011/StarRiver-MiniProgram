@@ -3,7 +3,6 @@
     <view v-if="order" class="order-detail">
       <text class="detail-name">{{ order.productName }}</text>
       <text class="detail-price">¥{{ formatYuan(order.amountFen) }}</text>
-      <text v-if="order.planAction === 'upgrade'" class="muted-text">补差升级 · 已用与冻结额度保留</text>
       <text v-if="order.planEndsAtUtc" class="muted-text">原到期时间：{{ formatDate(order.planEndsAtUtc) }}</text>
       <text v-if="order.paymentExpiresAtUtc && order.status === BillingOrderStatus.Pending" class="muted-text">
         支付报价有效至：{{ formatDate(order.paymentExpiresAtUtc) }}，过期后请重新选择套餐。
