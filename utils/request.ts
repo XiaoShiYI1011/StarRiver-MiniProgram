@@ -17,6 +17,8 @@ interface RequestConfig extends RequestOptions {
   params?: Record<string, unknown>;
   timeout?: number;
   token?: string;
+  /** 扫码凭证交换独立于旧会话，避免旧 token 阻断或污染新登录。 */
+  anonymous?: boolean;
 }
 
 const defaultTimeoutMs = 30_000;
@@ -108,7 +110,7 @@ const assertUsableBaseUrl = () => {
 
 export const request = async <T>(config: RequestConfig): Promise<T> => {
   assertUsableBaseUrl();
-  const pair = auth.getPair();
+  const pair = config.anonymous ? null : auth.getPair();
   const generation = auth.getGeneration();
   const token = config.token || pair?.accessToken;
   return new Promise<T>((resolve, reject) => {
@@ -124,7 +126,7 @@ export const request = async <T>(config: RequestConfig): Promise<T> => {
       },
       success(response) {
         try {
-          auth.syncPair(response.header || {}, generation);
+          if (!config.anonymous) auth.syncPair(response.header || {}, generation);
         } catch (error) {
           reject(error);
           return;
@@ -140,7 +142,7 @@ export const request = async <T>(config: RequestConfig): Promise<T> => {
             generation === auth.getGeneration() &&
             pair?.sessionId === auth.getPair()?.sessionId &&
             pair?.sessionVersion === auth.getPair()?.sessionVersion;
-          if (currentRequest) {
+          if (currentRequest && !config.anonymous) {
             auth.invalidate(error.code || "", generation, pair?.sessionId, pair?.sessionVersion);
             notifyUnauthorized(error.statusCode, config.skipAuthRedirect);
           }

@@ -14,6 +14,7 @@ export enum BillingOrderStatus {
   Cancelled = 3,
   Refunded = 4,
   AdministratorAdjusted = 5,
+  PaidNeedsReview = 6,
 }
 
 import type { ProductStatus } from "@/packages/shop/types/billing";
@@ -30,6 +31,9 @@ export interface WritingPlanProduct {
   sevenDayCredits: number;
   status: ProductStatus;
   displayOrder: number;
+  planLevel: number;
+  purchaseAction?: "purchase" | "renew" | "upgrade" | "unavailable";
+  purchaseUnavailableReason?: string | null;
   isRecommended: boolean;
   includesDraftPlan: boolean;
   includesRemediationStrategy: boolean;
@@ -76,6 +80,9 @@ export interface CreditSummary {
 }
 
 export interface BillingOrder {
+  planAction?: "purchase" | "renew" | "upgrade" | null;
+  planEndsAtUtc?: string | null;
+  paymentExpiresAtUtc?: string | null;
   id: string;
   orderNo: string;
   orderType: BillingOrderType;
@@ -96,4 +103,17 @@ export interface VirtualPaymentPayData {
   signature: string;
   mode: string;
   paySig: string;
+}
+
+export interface PlanPurchaseQuote {
+  id: string;
+  action: "purchase" | "renew" | "upgrade";
+  productId: string;
+  productName: string;
+  currentProductName?: string | null;
+  amountFen: number;
+  expiresAtUtc: string;
+  endsAtUtc?: string | null;
+  eightHourCredits: number;
+  sevenDayCredits: number;
 }

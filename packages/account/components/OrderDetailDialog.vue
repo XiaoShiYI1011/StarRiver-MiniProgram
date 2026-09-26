@@ -3,6 +3,14 @@
     <view v-if="order" class="order-detail">
       <text class="detail-name">{{ order.productName }}</text>
       <text class="detail-price">¥{{ formatYuan(order.amountFen) }}</text>
+      <text v-if="order.planAction === 'upgrade'" class="muted-text">补差升级 · 已用与冻结额度保留</text>
+      <text v-if="order.planEndsAtUtc" class="muted-text">原到期时间：{{ formatDate(order.planEndsAtUtc) }}</text>
+      <text v-if="order.paymentExpiresAtUtc && order.status === BillingOrderStatus.Pending" class="muted-text">
+        支付报价有效至：{{ formatDate(order.paymentExpiresAtUtc) }}，过期后请重新选择套餐。
+      </text>
+      <text v-if="order.status === BillingOrderStatus.PaidNeedsReview" class="muted-text">
+        付款已记录，订阅状态变化导致权益未自动发放，请联系客服处理。
+      </text>
       <text class="muted-text">订单号：{{ order.orderNo }}</text>
       <text v-if="order.grantedCredits" class="muted-text">到账积分：{{ formatNumber(order.grantedCredits) }}</text>
       <text class="muted-text">创建时间：{{ formatDate(order.createdAt) }}</text>
@@ -46,6 +54,7 @@ const labels: Record<BillingOrderStatus, string> = {
   [BillingOrderStatus.Cancelled]: "已关闭",
   [BillingOrderStatus.Refunded]: "已退款",
   [BillingOrderStatus.AdministratorAdjusted]: "管理员调整",
+  [BillingOrderStatus.PaidNeedsReview]: "已付款，权益待处理",
 };
 watch(
   () => props.order?.id,

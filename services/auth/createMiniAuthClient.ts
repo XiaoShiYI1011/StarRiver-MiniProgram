@@ -82,10 +82,10 @@ export const createMiniAuthClient = (dependencies: Dependencies) => {
   };
 
   const restore = async (): Promise<AuthUser | null> => {
+    if (pending) return pending;
     if (manuallyLoggedOut) return null;
     if (user && session && Date.parse(session.sessionExpiresAtUtc) > Date.now() && Date.now() - checkedAt < 60000)
       return user;
-    if (pending) return pending;
     const version = generation;
     pending = (async () => {
       if (session && Date.parse(session.sessionExpiresAtUtc) > Date.now()) {
@@ -174,6 +174,25 @@ export const createMiniAuthClient = (dependencies: Dependencies) => {
     },
     async requestCode(email: string) {
       return dependencies.sendEmailCode({ email: email.trim() });
+    },
+    async loginForPurchase(exchange: () => Promise<{ session: MiniSession; productId: string }>) {
+      // 避免启动中的旧自动登录覆盖扫码获得的新会话。
+      if (pending) await pending.catch(() => null);
+      const version = ++generation;
+      let productId = "";
+      const login = (async () => {
+        const result = await exchange();
+        if (version !== generation) throw new Error("登录状态已变化，请重新扫码");
+        productId = result.productId;
+        return accept(result.session, version);
+      })();
+      pending = login;
+      try {
+        await login;
+        return productId;
+      } finally {
+        if (pending === login) pending = null;
+      }
     },
     async bind(input: BindInput) {
       if (!input.agreed) throw new Error("请先勾选用户协议与隐私政策");

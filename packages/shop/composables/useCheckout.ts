@@ -4,33 +4,49 @@ import { billingApi, newIdempotencyKey } from "@/api/billing";
 import { openBind } from "@/utils/navigation";
 import { errorMessage } from "@/utils/format";
 import { pollOrderPaid, requestVirtualPayment, VirtualPaymentCancelledError } from "@/services/virtualPayment";
-import type { WritingPlanProduct } from "@/types/billing";
+import { BillingOrderStatus } from "@/types/billing";
+import type { WritingPlanProduct, PlanPurchaseQuote } from "@/types/billing";
+import { miniAuthClient } from "@/services/auth/miniAuthClient";
 
 export type CheckoutSelection =
-  { kind: "plan"; product: WritingPlanProduct } | { kind: "recharge"; amountFen: number; credits: number };
+  | { kind: "plan"; product: WritingPlanProduct; quote: PlanPurchaseQuote }
+  | { kind: "recharge"; amountFen: number; credits: number };
 
 export const useCheckout = () => {
-  const { isBound, refresh } = useStudio();
+  const { refresh } = useStudio();
   const selected = ref<CheckoutSelection | null>(null);
   const busy = ref(false);
   const error = ref("");
   let orderId = "";
+  let createKey = newIdempotencyKey();
   const reset = () => {
     error.value = "";
     orderId = "";
+    createKey = newIdempotencyKey();
   };
   const ensureBound = async (resumeProductId = "") => {
-    await refresh();
-    if (!isBound.value) {
+    try {
+      if (await miniAuthClient.restore()) return true;
       openBind(resumeProductId);
       return false;
+    } catch (reason) {
+      uni.showToast({ title: errorMessage(reason), icon: "none" });
+      return false;
     }
-    return true;
   };
   const select = async (product: WritingPlanProduct) => {
     if (!(await ensureBound(product.id))) return;
-    selected.value = { kind: "plan", product };
-    reset();
+    if (busy.value) return;
+    busy.value = true;
+    try {
+      const quote = await billingApi.quotePlan(product.id);
+      selected.value = { kind: "plan", product, quote };
+      reset();
+    } catch (reason) {
+      uni.showToast({ title: errorMessage(reason), icon: "none" });
+    } finally {
+      busy.value = false;
+    }
   };
   const selectRecharge = async (amountFen: number, credits: number) => {
     // 充值不携带恢复参数：绑定流程结束后回到“我的”，重新进入套餐页再操作。
@@ -50,12 +66,24 @@ export const useCheckout = () => {
       if (!orderId) {
         const order =
           selection.kind === "plan"
-            ? await billingApi.createPlanOrder({ productId: selection.product.id, idempotencyKey: newIdempotencyKey() })
+            ? await billingApi.createPlanOrder({
+                productId: selection.product.id,
+                quoteId: selection.quote.id,
+                idempotencyKey: createKey,
+                expectedPriceFen: selection.product.priceFen,
+                expectedProductVersion: selection.product.editVersion,
+              })
             : await billingApi.createCreditOrder({
                 amountFen: selection.amountFen,
-                idempotencyKey: newIdempotencyKey(),
+                idempotencyKey: createKey,
               });
         orderId = order.id;
+        if (order.status === BillingOrderStatus.Paid) {
+          await refresh();
+          selected.value = null;
+          uni.showToast({ title: "套餐升级已生效", icon: "success" });
+          return;
+        }
       }
       if (!pay) {
         await refresh();
@@ -80,6 +108,20 @@ export const useCheckout = () => {
       else uni.showToast({ title: paid ? "支付成功" : "支付结果确认中，到账后可在订单记录查看", icon: "none" });
     } catch (reason) {
       error.value = errorMessage(reason);
+      if (selection.kind === "plan" && (reason as { statusCode?: number }).statusCode === 409) {
+        try {
+          const latest = (await billingApi.queryProducts()).find((item) => item.id === selection.product.id);
+          if (latest && latest.purchaseAction !== "unavailable") {
+            const quote = await billingApi.quotePlan(latest.id);
+            selected.value = { kind: "plan", product: latest, quote };
+            orderId = "";
+            createKey = newIdempotencyKey();
+            error.value = "报价或订阅状态已变化，请核对金额后再次确认；已有待支付订单请在订单记录中处理。";
+          }
+        } catch {
+          /* Keep the original error when a fresh quote is unavailable. */
+        }
+      }
     } finally {
       busy.value = false;
     }

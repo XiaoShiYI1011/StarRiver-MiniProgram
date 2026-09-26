@@ -6,6 +6,10 @@
         "navigationBarTitleText": "星河创作",
         "disableScroll": true
       }
+    },
+    {
+      "path": "pages/purchase/index",
+      "style": { "navigationBarTitleText": "扫码购买", "disableScroll": true }
     }
   ],
   "subPackages": [

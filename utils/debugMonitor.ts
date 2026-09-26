@@ -101,7 +101,8 @@ const safeStringify = (value: unknown, pretty = false): string => {
     return (
       JSON.stringify(
         value,
-        (_key, item) => {
+        (key, item) => {
+          if (/^(ticket|wxCode|accessToken|refreshToken|sessionKey|credential|password)$/i.test(key)) return "[已隐藏]";
           if (typeof item === "bigint") return `${item}n`;
           if (typeof item === "function") return `[Function ${item.name || "anonymous"}]`;
           if (typeof item === "object" && item !== null) {

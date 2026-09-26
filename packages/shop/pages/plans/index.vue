@@ -1,5 +1,5 @@
 <template>
-  <AppPage>
+  <AppPage :scroll-into-view="rechargeScrollTarget">
     <template #mainContent>
       <view class="page-stack">
         <PageHeading
@@ -21,11 +21,13 @@
             :key="plan.id"
             :plan="plan"
             :beta-free-mode="betaFreeMode"
-            @select="selectPlan"
             :active="activePlanId === plan.id"
+            @select="selectPlan"
             @activate="activePlanId = $event"
           />
-          <SectionHeading eyebrow="创作加油包" :title="betaFreeMode ? '内测期间无需充值' : '按需补充创作积分'" />
+          <view id="recharge-entry">
+            <SectionHeading eyebrow="创作加油包" :title="betaFreeMode ? '内测期间无需充值' : '按需补充创作积分'" />
+          </view>
           <RechargeCard
             v-if="!betaFreeMode && summary"
             :credits-per-yuan="summary.creditsPerYuan"
@@ -57,7 +59,7 @@
 
 <script setup lang="ts">
 import { onLoad } from "@dcloudio/uni-app";
-import { computed, ref } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import AppPage from "@/layout/components/pageContainer.vue";
 import BottomNav from "@/components/layout/BottomNav.vue";
 import LegalFooter from "@/components/layout/LegalFooter.vue";
@@ -78,6 +80,8 @@ import type { CreditSummary, WritingPlanProduct } from "@/types/billing";
 
 const products = ref<WritingPlanProduct[]>([]);
 const activePlanId = ref("");
+const rechargeScrollTarget = ref("");
+let requestedRecharge = false;
 const summary = ref<CreditSummary | null>(null);
 // 未登录/未加载时不假定内测模式，避免向未绑定用户展示内测文案；以内测接口返回为准。
 const betaFreeMode = computed(() => summary.value?.betaFreeMode === true);
@@ -88,6 +92,8 @@ const selectPlan = (plan: WritingPlanProduct) => {
 };
 const loadError = ref("");
 const { isBound } = useStudio();
+let requestedProductId = "";
+let resumeCheckout = false;
 
 const loadAll = async () => {
   loadError.value = "";
@@ -103,17 +109,35 @@ const loadAll = async () => {
     if (!products.value.some((plan) => plan.id === activePlanId.value)) {
       activePlanId.value = products.value.find((plan) => plan.isRecommended)?.id ?? products.value[0]?.id ?? "";
     }
+    if (requestedProductId) {
+      const product = products.value.find((item) => item.id === requestedProductId);
+      if (!product) throw new Error("所选商品不存在或已停售，请返回网页重新选择");
+      activePlanId.value = product.id;
+      if (resumeCheckout && !betaFreeMode.value) {
+        await select(product);
+        if (selected.value) resumeCheckout = false;
+      }
+    }
+    if (requestedRecharge) {
+      await nextTick();
+      rechargeScrollTarget.value = "recharge-entry";
+      requestedRecharge = false;
+    }
   } catch (reason) {
     loadError.value = errorMessage(reason);
     products.value = [];
   }
 };
 
+watch(selected, (value, previous) => {
+  if (!value && previous) void loadAll();
+});
+
 onLoad(async (options) => {
+  requestedProductId = typeof options?.product === "string" ? options.product : "";
+  requestedRecharge = options?.recharge === "1";
+  resumeCheckout = options?.checkout === "1";
   await loadAll();
-  const productId = typeof options?.product === "string" ? options.product : "";
-  const product = products.value.find((item) => item.id === productId);
-  if (product) activePlanId.value = product.id;
 });
 </script>
 

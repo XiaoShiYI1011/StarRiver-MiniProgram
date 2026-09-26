@@ -1,13 +1,28 @@
 <template>
-  <AppDialog :open="!!selection" title="确认开通" :busy="busy" @close="emit('close')">
+  <AppDialog
+    :open="!!selection"
+    :title="selection?.kind === 'plan' && selection.quote.action === 'upgrade' ? '确认升级' : '确认购买'"
+    :busy="busy"
+    @close="emit('close')"
+  >
     <view v-if="selection" class="checkout-summary">
       <template v-if="selection.kind === 'plan'">
         <text class="checkout-name">{{ selection.product.name }}</text>
-        <text class="checkout-price">¥{{ formatYuan(selection.product.priceFen) }}</text>
-        <text class="muted-text">{{ selection.product.durationDays }} 天创作权益 · 权益与网页端通用</text>
+        <text class="checkout-price">¥{{ formatYuan(selection.quote.amountFen) }}</text>
+        <template v-if="selection.quote.action === 'upgrade'">
+          <text class="muted-text">{{ selection.quote.currentProductName }} → {{ selection.quote.productName }}</text>
+          <text class="muted-text">剩余有效期差价向上取整到元，支付后立即升级。</text>
+          <text class="muted-text">到期时间不变：{{ formatDate(selection.quote.endsAtUtc) }}</text>
+          <text class="muted-text">已用与冻结额度保留，额度刷新时间不变。</text>
+        </template>
+        <text v-else class="muted-text">
+          {{ selection.product.durationDays }} 天创作权益 ·
+          {{ selection.quote.action === "renew" ? "从原到期时间续期" : "支付后生效" }}
+        </text>
+        <text class="muted-text">报价有效至 {{ formatDate(selection.quote.expiresAtUtc) }}</text>
         <text class="muted-text">
-          8 小时额度 {{ formatNumber(selection.product.eightHourCredits) }} 积分 · 7 天额度
-          {{ formatNumber(selection.product.sevenDayCredits) }} 积分
+          8 小时额度 {{ formatNumber(selection.quote.eightHourCredits) }} 积分 · 7 天额度
+          {{ formatNumber(selection.quote.sevenDayCredits) }} 积分
         </text>
       </template>
       <template v-else>
@@ -30,6 +45,8 @@
 import AppDialog from "@/components/ui/AppDialog.vue";
 import { formatNumber, formatYuan } from "@/utils/format";
 import type { CheckoutSelection } from "../composables/useCheckout";
+
+const formatDate = (value?: string | null) => (value ? new Date(value).toLocaleString() : "—");
 
 defineProps<{ selection: CheckoutSelection | null; busy: boolean; error: string }>();
 const emit = defineEmits<{ close: []; confirm: []; later: [] }>();
