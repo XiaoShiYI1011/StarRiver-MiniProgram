@@ -33,7 +33,7 @@
         plan.purchaseAction === "upgrade"
           ? "升级套餐"
           : plan.purchaseAction === "renew"
-            ? "续费套餐"
+            ? "续订套餐"
             : plan.purchaseAction === "unavailable"
               ? plan.purchaseUnavailableReason || "有效期内不支持降级"
               : `选择${plan.name}`
