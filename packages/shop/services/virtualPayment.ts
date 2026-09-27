@@ -15,6 +15,7 @@ export class VirtualPaymentCancelledError extends Error {
 
 interface WxRequestVirtualPaymentResult {
   errMsg?: string;
+  errCode?: number;
 }
 
 /** 比较点分版本号，left 小于 right 返回 -1。 */
@@ -60,6 +61,9 @@ export const requestVirtualPayment = (payData: VirtualPaymentPayData) =>
       fail: (result: WxRequestVirtualPaymentResult) => {
         if (typeof result?.errMsg === "string" && result.errMsg.includes("cancel"))
           reject(new VirtualPaymentCancelledError());
+        else if (result?.errCode === -15002 || result?.errCode === -15012)
+          reject(new Error("微信订单已使用或关闭，请返回充值/套餐页重新下单；如已扣款，请先查看订单到账状态"));
+        else if (result?.errCode === -15007) reject(new Error("微信登录状态已过期，请重新点击支付以刷新登录状态"));
         else reject(new Error(result?.errMsg || "虚拟支付调起失败，请稍后重试"));
       },
     });

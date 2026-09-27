@@ -30,9 +30,9 @@ export const billingApi = {
     expectedPriceFen?: number;
     expectedProductVersion?: number;
   }) => request<BillingOrder>({ url: `${orderPrefix}/CreatePlanOrder`, method: "POST", data: input }),
-  createCreditOrder: (input: { amountFen: number; idempotencyKey: string }) =>
+  createCreditOrder: (input: { amountFen: number; idempotencyKey: string; expectedGrantedCredits: number }) =>
     request<BillingOrder>({ url: `${orderPrefix}/CreateCreditOrder`, method: "POST", data: input }),
-  createVirtualPayment: (input: { orderId: string }) =>
+  createVirtualPayment: (input: { orderId: string; wxCode: string }) =>
     request<VirtualPaymentPayData>({ url: `${orderPrefix}/CreateVirtualPayment`, method: "POST", data: input }),
   queryOrder: (orderId: string) =>
     request<BillingOrder>({ url: `${orderPrefix}/QueryOrder`, method: "GET", params: { orderId } }),

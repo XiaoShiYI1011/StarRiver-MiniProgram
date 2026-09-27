@@ -11,6 +11,7 @@ import {
 import { BillingOrderStatus } from "@/packages/shop/types/billing";
 import type { WritingPlanProduct, PlanPurchaseQuote } from "@/types/billing";
 import { miniAuthClient } from "@/services/auth/miniAuthClient";
+import { getWeChatCode } from "@/services/auth/wechatLogin";
 
 export type CheckoutSelection =
   | { kind: "plan"; product: WritingPlanProduct; quote: PlanPurchaseQuote }
@@ -55,8 +56,21 @@ export const useCheckout = () => {
   const selectRecharge = async (amountFen: number, credits: number) => {
     // 充值不携带恢复参数：绑定流程结束后回到“我的”，重新进入套餐页再操作。
     if (!(await ensureBound())) return;
-    selected.value = { kind: "recharge", amountFen, credits };
-    reset();
+    if (busy.value) return;
+    busy.value = true;
+    try {
+      const summary = await billingApi.queryCreditSummary();
+      if (summary.betaFreeMode) throw new Error("内测期间暂不开放充值");
+      if (amountFen < summary.minimumRechargeFen) throw new Error("最低充值金额已更新，请刷新后重新选择");
+      const latestCredits = (amountFen / 100) * summary.creditsPerYuan;
+      selected.value = { kind: "recharge", amountFen, credits: latestCredits };
+      reset();
+      if (latestCredits !== credits) error.value = "充值比例已更新，请核对当前到账积分。";
+    } catch (reason) {
+      uni.showToast({ title: errorMessage(reason), icon: "none" });
+    } finally {
+      busy.value = false;
+    }
   };
   const close = () => {
     if (!busy.value) selected.value = null;
@@ -79,6 +93,7 @@ export const useCheckout = () => {
               })
             : await billingApi.createCreditOrder({
                 amountFen: selection.amountFen,
+                expectedGrantedCredits: selection.credits,
                 idempotencyKey: createKey,
               });
         orderId = order.id;
@@ -95,8 +110,8 @@ export const useCheckout = () => {
         uni.showToast({ title: "订单已创建，可在订单记录中查看", icon: "none" });
         return;
       }
-      // 同一订单重复发起支付返回同一商户单号，取消后可原单继续支付。
-      const payData = await billingApi.createVirtualPayment({ orderId });
+      // 每次支付前刷新微信登录态，微信拒绝复用单号时提示重新下单。
+      const payData = await billingApi.createVirtualPayment({ orderId, wxCode: await getWeChatCode() });
       let cancelled = false;
       try {
         await requestVirtualPayment(payData);
@@ -108,10 +123,22 @@ export const useCheckout = () => {
       const paid = cancelled ? false : await pollOrderPaid(orderId);
       await refresh();
       selected.value = null;
-      if (cancelled) uni.showToast({ title: "已取消支付，可稍后继续支付", icon: "none" });
+      if (cancelled) uni.showToast({ title: "已取消支付", icon: "none" });
       else uni.showToast({ title: paid ? "支付成功" : "支付结果确认中，到账后可在订单记录查看", icon: "none" });
     } catch (reason) {
       error.value = errorMessage(reason);
+      if (selection.kind === "recharge" && (reason as { statusCode?: number }).statusCode === 409) {
+        try {
+          const summary = await billingApi.queryCreditSummary();
+          selected.value = { ...selection, credits: (selection.amountFen / 100) * summary.creditsPerYuan };
+          orderId = "";
+          createKey = newIdempotencyKey();
+          error.value = "充值比例已更新，请核对到账积分后再次确认。";
+          await refresh();
+        } catch {
+          /* 保留原始错误，重新加载成功前不自动支付。 */
+        }
+      }
       if (selection.kind === "plan" && (reason as { statusCode?: number }).statusCode === 409) {
         try {
           const latest = (await billingApi.queryProducts()).find((item) => item.id === selection.product.id);

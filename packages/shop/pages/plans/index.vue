@@ -68,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import { onLoad } from "@dcloudio/uni-app";
+import { onLoad, onShow } from "@dcloudio/uni-app";
 import { computed, ref, watch } from "vue";
 import AppPage from "@/layout/components/pageContainer.vue";
 import BottomNav from "@/components/layout/BottomNav.vue";
@@ -143,6 +143,10 @@ const loadAll = async () => {
 
 watch(selected, (value, previous) => {
   if (!value && previous) void loadAll();
+});
+
+onShow(() => {
+  if (summary.value && !busy.value) void loadAll();
 });
 
 onLoad(async (options) => {

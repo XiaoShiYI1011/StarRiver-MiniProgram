@@ -7,12 +7,13 @@
     <view class="recharge-row">
       <text class="recharge-unit">¥</text>
       <input v-model="amountText" class="recharge-input" type="digit" placeholder="输入金额" :disabled="disabled" />
-      <text class="recharge-credits">≈ {{ formatNumber(credits) }} 积分</text>
+      <text class="recharge-credits">{{ formatNumber(credits) }} 积分</text>
     </view>
     <text class="recharge-note">
-      购买后到账 {{ formatNumber(credits) }} 创作积分，最低
+      预计到账 {{ formatNumber(credits) }} 创作积分，最低
       {{ formatYuan(minimumRechargeFen) }} 元，需为整数元；充值积分独立于套餐额度扣减，用于创作消耗。
     </text>
+    <text class="recharge-note">当前比例与网页端同步；支付前请核对确认页的到账积分。</text>
     <button class="primary-button" :disabled="disabled || !valid" @tap="emit('select', amountFen, credits)">
       {{ disabled ? "内测期间暂不开放" : "立即充值" }}
     </button>
@@ -26,7 +27,7 @@ import { formatNumber, formatYuan } from "@/utils/format";
 const props = defineProps<{ creditsPerYuan: number; minimumRechargeFen: number; disabled?: boolean }>();
 const emit = defineEmits<{ select: [amountFen: number, credits: number] }>();
 
-// 虚拟支付按 1 元 = 100 代币整元下单，金额必须为 100 分的整数倍。
+// 微信按整元计价，业务积分按服务端公共策略换算。
 const amountText = ref(String(Math.max(1, Math.ceil(props.minimumRechargeFen / 100))));
 watch(
   () => props.minimumRechargeFen,
@@ -36,7 +37,13 @@ watch(
 );
 const amountFen = computed(() => Math.round((Number.parseFloat(amountText.value) || 0) * 100));
 const credits = computed(() => Math.floor((amountFen.value / 100) * props.creditsPerYuan));
-const valid = computed(() => amountFen.value >= props.minimumRechargeFen && amountFen.value % 100 === 0);
+const valid = computed(
+  () =>
+    Number.isSafeInteger(amountFen.value) &&
+    amountFen.value >= props.minimumRechargeFen &&
+    amountFen.value <= 100_000_000 &&
+    amountFen.value % 100 === 0
+);
 </script>
 
 <style lang="scss" scoped>

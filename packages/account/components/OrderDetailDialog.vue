@@ -46,6 +46,7 @@ import {
 } from "@/packages/account/services/virtualPayment";
 import { BillingOrderStatus } from "@/packages/account/types/billing";
 import type { BillingOrder } from "@/types/billing";
+import { getWeChatCode } from "@/services/auth/wechatLogin";
 
 const props = defineProps<{ order: BillingOrder | null }>();
 const emit = defineEmits<{ close: [] }>();
@@ -73,8 +74,8 @@ const pay = async () => {
   busy.value = true;
   error.value = "";
   try {
-    // 同一订单重复发起支付返回同一商户单号，取消后可原单继续支付。
-    const payData = await billingApi.createVirtualPayment({ orderId: props.order.id });
+    // 每次支付前刷新微信登录态，微信拒绝复用单号时提示重新下单。
+    const payData = await billingApi.createVirtualPayment({ orderId: props.order.id, wxCode: await getWeChatCode() });
     let cancelled = false;
     try {
       await requestVirtualPayment(payData);
@@ -87,7 +88,7 @@ const pay = async () => {
     await refreshDashboard();
     emit("close");
     uni.showToast({
-      title: cancelled ? "已取消支付，可稍后继续支付" : paid ? "支付成功" : "支付结果确认中，到账后可在订单记录查看",
+      title: cancelled ? "已取消支付" : paid ? "支付成功" : "支付结果确认中，到账后可在订单记录查看",
       icon: "none",
     });
   } catch (reason) {
