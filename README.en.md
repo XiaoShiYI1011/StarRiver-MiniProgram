@@ -18,6 +18,8 @@ The WeChat Mini Program frontend for StarRiver (星河创作), built with **UniA
 
 GitHub and Gitee are official mirrors of the same project.
 
+[Changelog](CHANGELOG.md)
+
 ## StarRiver and this repository
 
 The full StarRiver product supports drafting and editing fiction and scripts, organizing settings and story memory, managing writing plans, and exporting saved work. These features are provided through the desktop experience and backend services. The WeChat frontend focuses on the following functions.
