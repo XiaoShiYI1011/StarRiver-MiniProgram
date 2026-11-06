@@ -1,8 +1,7 @@
 // Keep the Web and UniApp copies in sync. Obfuscation is not a security boundary.
 const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 const base64Bytes = (text: string): Uint8Array => {
-  if (text.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(text))
-    throw new Error("Invalid protected text");
+  if (text.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(text)) throw new Error("Invalid protected text");
   const length = (text.length / 4) * 3 - (text.endsWith("==") ? 2 : text.endsWith("=") ? 1 : 0);
   const bytes = new Uint8Array(length);
   let offset = 0;

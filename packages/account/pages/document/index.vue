@@ -41,20 +41,20 @@ onLoad((options) => {
   font-size: 28rpx;
   line-height: 1.8;
   color: var(--ink);
-}
 
-.document-title {
-  font-size: 34rpx;
-  font-weight: 700;
-  text-align: center;
-}
+  .document-title {
+    font-size: 34rpx;
+    font-weight: 700;
+    text-align: center;
+  }
 
-.document-meta {
-  font-size: 24rpx;
-}
+  .document-meta {
+    font-size: 24rpx;
+  }
 
-.document-chapter {
-  margin-top: 12rpx;
-  font-weight: 700;
+  .document-chapter {
+    margin-top: 12rpx;
+    font-weight: 700;
+  }
 }
 </style>
