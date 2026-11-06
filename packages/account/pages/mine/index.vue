@@ -15,7 +15,7 @@
             @tap="openNovels"
           />
           <view class="cell-group__divider" />
-          <InfoCell icon="clipboard" title="电脑端创作" description="正式网址待上线后提供" @tap="copyWebsite" />
+          <InfoCell icon="clipboard" title="电脑端创作" description="复制网址，在电脑浏览器打开" @tap="copyWebsite" />
         </view>
         <SectionHeading eyebrow="交易" title="订单记录" action="全部" @action="openOrders" />
         <OrderList :orders="dashboard.orders.slice(0, 3)" @select="selectedOrder = $event" />
@@ -89,7 +89,12 @@ onShow(() => {
 
 const openNovels = () => (account.value ? uni.navigateTo({ url: "/packages/account/pages/novels/index" }) : openBind());
 const openOrders = () => (account.value ? uni.navigateTo({ url: "/packages/account/pages/orders/index" }) : openBind());
-const copyWebsite = () => uni.showToast({ title: "电脑端网址将在正式上线后提供", icon: "none" });
+const desktopWebsite = "https://write.ydmkj.cc/app/";
+const copyWebsite = () =>
+  uni.setClipboardData({
+    data: desktopWebsite,
+    fail: () => uni.showModal({ title: "电脑端创作", content: desktopWebsite, showCancel: false }),
+  });
 const showVersion = () => uni.showToast({ title: "星河创作 v0.1.0", icon: "none" });
 const logout = async () => {
   if (loggingOut.value) return;
