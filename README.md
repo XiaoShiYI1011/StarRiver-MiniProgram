@@ -20,6 +20,28 @@ GitHub 与 Gitee 为同一项目的官方代码镜像。
 
 [更新记录](CHANGELOG.md)
 
+## 界面预览
+
+### 电脑端长篇小说工作台
+
+左侧是章节目录，中间可阅读、编辑和保存候选正文，右侧列出本次生成参考的人物、笔记和摘要。[打开电脑端工作台](https://write.ydmkj.cc/app/)
+
+![星河创作电脑端长篇小说工作台，展示章节目录、候选正文、下一章方向建议与本次参考](docs/screenshots/desktop-writing-workspace.png)
+
+### 微信小程序
+
+在微信内扫一扫体验小程序。首页介绍创作能力和使用流程，正文写作在电脑端进行。
+
+| 小程序首页 | 创作流程与常见问题 | 微信扫码体验 |
+| --- | --- | --- |
+| <img src="docs/screenshots/miniprogram-home.jpg" alt="星河创作微信小程序首页的功能介绍" width="184" /> | <img src="docs/screenshots/miniprogram-faq.jpg" alt="星河创作微信小程序首页的创作流程与常见问题" width="184" /> | <img src="docs/screenshots/miniprogram-code.png" alt="星河创作微信小程序码" width="132" /> |
+
+### 官网首页
+
+官网介绍长篇小说创作和故事记忆，提供使用指南、费用说明和注册入口。[访问星河创作官网](https://write.ydmkj.cc/)
+
+![星河创作官网首页实拍，展示长篇小说产品介绍和章节预览](docs/screenshots/official-site-homepage.png)
+
 ## 星河创作与本项目
 
 星河创作的完整产品包含以下能力。

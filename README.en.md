@@ -20,6 +20,28 @@ GitHub and Gitee are official mirrors of the same project.
 
 [Changelog](CHANGELOG.md)
 
+## Product screenshots
+
+### Desktop workspace for long-form fiction
+
+The chapter list is on the left, with a draft you can read, edit, and save in the center. The right panel lists the characters, notes, and summaries used for the draft. [Open the desktop workspace](https://write.ydmkj.cc/app/)
+
+![StarRiver desktop workspace with the chapter list, draft, next chapter suggestions, and story references](docs/screenshots/desktop-writing-workspace.png)
+
+### WeChat Mini Program
+
+Scan the code in WeChat to try the Mini Program. Its home page explains the writing features and workflow. Write and edit chapters in the desktop workspace.
+
+| Mini Program home | Workflow and FAQ | Scan in WeChat |
+| --- | --- | --- |
+| <img src="docs/screenshots/miniprogram-home.jpg" alt="Feature overview on the StarRiver WeChat Mini Program home page" width="184" /> | <img src="docs/screenshots/miniprogram-faq.jpg" alt="Writing workflow and FAQ in the StarRiver WeChat Mini Program" width="184" /> | <img src="docs/screenshots/miniprogram-code.png" alt="WeChat Mini Program code for StarRiver" width="132" /> |
+
+### Official website
+
+The official website introduces the long-form writing workspace and story memory, with links to guides, pricing, and registration. [Visit the StarRiver website](https://write.ydmkj.cc/)
+
+![Live StarRiver homepage showing the long-form fiction product introduction and chapter preview](docs/screenshots/official-site-homepage.png)
+
 ## StarRiver and this repository
 
 The full StarRiver product supports drafting and editing fiction and scripts, organizing settings and story memory, managing writing plans, and exporting saved work. These features are provided through the desktop experience and backend services. The WeChat frontend focuses on the following functions.
